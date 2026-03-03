@@ -22,10 +22,10 @@ const options: Options = {
       <h4>{children}</h4>
     ),
     [BLOCKS.UL_LIST]: (node: Block | Inline, children: ReactNode) => (
-      <ul>{children}</ul>
+      <ul className="list-disc pl-6 space-y-1 my-4">{children}</ul>
     ),
     [BLOCKS.OL_LIST]: (node: Block | Inline, children: ReactNode) => (
-      <ol>{children}</ol>
+      <ol className="list-decimal pl-6 space-y-1 my-4">{children}</ol>
     ),
     [BLOCKS.LIST_ITEM]: (node: Block | Inline, children: ReactNode) => (
       <li>{children}</li>
@@ -33,7 +33,18 @@ const options: Options = {
     [BLOCKS.QUOTE]: (node: Block | Inline, children: ReactNode) => (
       <blockquote>{children}</blockquote>
     ),
-    [BLOCKS.HR]: () => <hr />,
+    [BLOCKS.HR]: () => <hr className="my-8 border-t border-stone-300" />,
+    [BLOCKS.EMBEDDED_ASSET]: (node: Block | Inline) => {
+      const { title, file } = node.data.target.fields
+      const url = file?.url ? `https:${file.url}` : ''
+      const alt = title || ''
+      return (
+        <figure className="my-8">
+          <img src={url} alt={alt} className="w-full rounded" loading="lazy" />
+          {alt && <figcaption className="mt-2 text-sm text-center" style={{ color: 'var(--muted)' }}>{alt}</figcaption>}
+        </figure>
+      )
+    },
     [INLINES.HYPERLINK]: (node: Block | Inline, children: ReactNode) => {
       const { uri } = node.data
       return (
