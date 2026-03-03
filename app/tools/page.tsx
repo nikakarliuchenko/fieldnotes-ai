@@ -26,7 +26,7 @@ export default async function ToolsPage() {
 
   return (
     <main className="container">
-      <Header navigation={settings?.primaryNavigation || []} />
+      <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <section className="tools-page animate-fade-in-up">
         <SectionLabel>All Tools</SectionLabel>
@@ -46,7 +46,7 @@ export default async function ToolsPage() {
         )}
       </section>
 
-      <Footer copyright={settings?.copyright} />
+      <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
 
     </main>
   )

@@ -23,7 +23,7 @@ export default async function NotesPage() {
 
   return (
     <main className="container">
-      <Header navigation={settings?.primaryNavigation || []} />
+      <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <section className="notes-page animate-fade-in-up">
         <SectionLabel>All Field Notes</SectionLabel>
@@ -41,7 +41,7 @@ export default async function NotesPage() {
         )}
       </section>
 
-      <Footer copyright={settings?.copyright} />
+      <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
 
     </main>
   )
