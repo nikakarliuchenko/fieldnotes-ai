@@ -44,12 +44,13 @@ export default function Header({ navigation }: HeaderProps) {
         <div className="header-photo-section">
           <div className="header-photo-container">
             <Image
-              src="/nika.jpg"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_6663-uErCtyFxNVjSM7dYKeROkpSDDJjF15.jpeg"
               alt="Nika Karliuchenko"
               width={152}
               height={192}
               className="header-photo"
               priority
+              unoptimized
             />
           </div>
           <div className="header-photo-accent"></div>
