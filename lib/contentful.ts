@@ -146,7 +146,7 @@ function getDefaultGlobalSettings(): ParsedGlobalSettings {
     footerNavigation: [],
     socialLinks: [
       { platform: 'LinkedIn', url: 'https://linkedin.com', handle: undefined },
-      { platform: 'Twitter', url: 'https://twitter.com', handle: undefined },
+      { platform: 'X', url: 'https://x.com', handle: undefined },
     ],
     copyright: '2026 Nika Karliuchenko',
   }
