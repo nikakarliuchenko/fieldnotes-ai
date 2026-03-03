@@ -22,10 +22,10 @@ const options: Options = {
       <h4>{children}</h4>
     ),
     [BLOCKS.UL_LIST]: (node: Block | Inline, children: ReactNode) => (
-      <ul className="list-disc pl-6 space-y-0.5 my-4 [&_p]:my-0">{children}</ul>
+      <ul className="list-disc pl-6 my-4 [&_p]:!my-0 [&_li]:my-0">{children}</ul>
     ),
     [BLOCKS.OL_LIST]: (node: Block | Inline, children: ReactNode) => (
-      <ol className="list-decimal pl-6 space-y-0.5 my-4 [&_p]:my-0">{children}</ol>
+      <ol className="list-decimal pl-6 my-4 [&_p]:!my-0 [&_li]:my-0">{children}</ol>
     ),
     [BLOCKS.LIST_ITEM]: (node: Block | Inline, children: ReactNode) => (
       <li>{children}</li>
