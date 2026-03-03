@@ -342,6 +342,23 @@ a {
   margin-top: 6px;
 }
 
+.header-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.header-social-link {
+  color: var(--muted);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.header-social-link:hover {
+  color: #be2a2a;
+}
+
 .header-nav {
   display: flex;
   gap: 32px;
@@ -412,6 +429,25 @@ a {
   font-family: var(--font-heading);
   font-style: italic;
   font-size: 1rem;
+  color: var(--ink);
+}
+
+.footer-social {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-social-link {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-social-link:hover {
   color: var(--ink);
 }
 

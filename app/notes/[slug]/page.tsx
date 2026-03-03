@@ -86,7 +86,7 @@ export default async function NotePage({ params }: PageProps) {
 
   return (
     <main className="container">
-      <Header navigation={settings?.primaryNavigation || []} />
+      <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <article className="note-article animate-fade-in-up">
         {/* Entry Header */}
@@ -149,7 +149,7 @@ export default async function NotePage({ params }: PageProps) {
         </nav>
       </article>
 
-      <Footer copyright={settings?.copyright} />
+      <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
 
     </main>
   )

@@ -23,7 +23,7 @@ export default async function HomePage() {
 
   return (
     <main className="container">
-      <Header navigation={settings?.primaryNavigation || []} />
+      <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       {/* Featured Article */}
       {featuredNote && (
@@ -70,7 +70,7 @@ export default async function HomePage() {
         <AboutStrip socialLinks={settings?.socialLinks || []} />
       </div>
 
-      <Footer copyright={settings?.copyright} />
+      <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
 
     </main>
   )
