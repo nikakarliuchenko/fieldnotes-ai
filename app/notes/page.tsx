@@ -43,27 +43,6 @@ export default async function NotesPage() {
 
       <Footer copyright={settings?.copyright} />
 
-      <style jsx>{`
-        .notes-page {
-          margin-top: 16px;
-        }
-
-        .notes-list {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .empty-state {
-          padding: 48px 0;
-          text-align: center;
-        }
-
-        .empty-state p {
-          font-family: var(--font-body);
-          font-style: italic;
-          color: var(--muted);
-        }
-      `}</style>
     </main>
   )
 }

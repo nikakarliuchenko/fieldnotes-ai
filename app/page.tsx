@@ -72,49 +72,6 @@ export default async function HomePage() {
 
       <Footer copyright={settings?.copyright} />
 
-      <style jsx>{`
-        .notes-section {
-          margin-top: 48px;
-        }
-
-        .notes-list {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .tools-section {
-          margin-top: 48px;
-        }
-
-        .tools-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          border: 1px solid var(--rule);
-          gap: 1px;
-          background-color: var(--rule);
-        }
-
-        .tool-cell {
-          background-color: var(--paper);
-        }
-
-        .empty-state {
-          padding: 48px 0;
-          text-align: center;
-        }
-
-        .empty-state p {
-          font-family: var(--font-body);
-          font-style: italic;
-          color: var(--muted);
-        }
-
-        @media (max-width: 640px) {
-          .tools-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </main>
   )
 }

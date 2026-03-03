@@ -48,40 +48,6 @@ export default async function ToolsPage() {
 
       <Footer copyright={settings?.copyright} />
 
-      <style jsx>{`
-        .tools-page {
-          margin-top: 16px;
-        }
-
-        .tools-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          border: 1px solid var(--rule);
-          gap: 1px;
-          background-color: var(--rule);
-        }
-
-        .tool-cell {
-          background-color: var(--paper);
-        }
-
-        .empty-state {
-          padding: 48px 0;
-          text-align: center;
-        }
-
-        .empty-state p {
-          font-family: var(--font-body);
-          font-style: italic;
-          color: var(--muted);
-        }
-
-        @media (max-width: 640px) {
-          .tools-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </main>
   )
 }

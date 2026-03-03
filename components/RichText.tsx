@@ -50,18 +50,6 @@ export default function RichText({ content, showDropCap = false }: RichTextProps
     <div className={`rich-text ${showDropCap ? 'with-drop-cap' : ''}`}>
       {documentToReactComponents(content, options)}
 
-      <style jsx global>{`
-        .rich-text.with-drop-cap > p:first-child::first-letter {
-          font-family: var(--font-heading);
-          float: left;
-          font-size: 3.5rem;
-          line-height: 0.8;
-          padding-right: 12px;
-          padding-top: 4px;
-          color: var(--accent);
-          font-weight: 700;
-        }
-      `}</style>
     </div>
   )
 }
