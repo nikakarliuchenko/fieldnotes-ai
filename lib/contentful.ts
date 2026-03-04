@@ -145,8 +145,9 @@ function getDefaultGlobalSettings(): ParsedGlobalSettings {
     ],
     footerNavigation: [],
     socialLinks: [
-      { platform: 'LinkedIn', url: 'https://linkedin.com', handle: undefined },
-      { platform: 'Twitter', url: 'https://twitter.com', handle: undefined },
+      { platform: 'X', url: 'https://x.com/fieldnotes-ai', handle: '@fieldnotes_ai' },
+      { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/nikakarl' },
+      { platform: 'GitHub', url: 'https://github.com/fieldnotes-ai' },
     ],
     copyright: '2026 Nika Karliuchenko',
   }
