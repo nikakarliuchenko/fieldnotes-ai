@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="16" fill="#2c2c2c"/>
+  <!-- Notebook body -->
+  <rect x="28" y="18" width="72" height="92" rx="4" fill="#f6f1e9"/>
+  <!-- Spine -->
+  <rect x="28" y="18" width="8" height="92" rx="2" fill="#d4cbb8"/>
+  <!-- Ruled lines -->
+  <line x1="44" y1="38" x2="90" y2="38" stroke="#d4cbb8" stroke-width="1.5"/>
+  <line x1="44" y1="50" x2="90" y2="50" stroke="#d4cbb8" stroke-width="1.5"/>
+  <line x1="44" y1="62" x2="90" y2="62" stroke="#d4cbb8" stroke-width="1.5"/>
+  <line x1="44" y1="74" x2="90" y2="74" stroke="#d4cbb8" stroke-width="1.5"/>
+  <line x1="44" y1="86" x2="90" y2="86" stroke="#d4cbb8" stroke-width="1.5"/>
+  <line x1="44" y1="98" x2="90" y2="98" stroke="#d4cbb8" stroke-width="1.5"/>
+  <!-- Bookmark ribbon -->
+  <path d="M72 18 L72 108 L76 102 L80 108 L80 18" fill="#be2a2a"/>
+</svg>

@@ -26,6 +26,21 @@ export const metadata: Metadata = {
   title: 'FieldNotes AI',
   description: 'A personal journal by Nika Karliuchenko documenting what happens when content infrastructure meets AI.',
   generator: 'v0.app',
+  icons: {
+    icon: [
+      { url: '/fieldnotes-ai-favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  manifest: '/manifest.webmanifest',
+  openGraph: {
+    title: 'FieldNotes AI',
+    description: 'A personal journal by Nika Karliuchenko documenting what happens when content infrastructure meets AI.',
+    images: [{ url: '/icon-512.png', width: 512, height: 512 }],
+  },
 }
 
 export default function RootLayout({
