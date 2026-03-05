@@ -483,34 +483,10 @@ a {
   color: var(--ink);
 }
 
-.about-links {
-  display: flex;
-  gap: 16px;
-  flex-shrink: 0;
-}
-
-.social-link {
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.social-link:hover {
-  color: var(--accent);
-}
-
 @media (max-width: 640px) {
   .about-strip {
     flex-direction: column;
     gap: 16px;
-  }
-
-  .about-links {
-    align-self: flex-start;
   }
 }
 
@@ -807,6 +783,7 @@ a {
 }
 
 .note-body {
+  max-width: 640px;
   margin-bottom: 48px;
 }
 

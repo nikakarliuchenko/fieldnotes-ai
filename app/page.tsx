@@ -67,7 +67,7 @@ export default async function HomePage() {
 
       {/* About Strip */}
       <div className="animate-fade-in-up animation-delay-300">
-        <AboutStrip socialLinks={settings?.socialLinks || []} />
+        <AboutStrip />
       </div>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
