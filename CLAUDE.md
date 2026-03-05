@@ -30,7 +30,7 @@ When Contentful env vars are missing, the app serves hardcoded default/demo cont
 
 ### Data Flow
 
-All pages are **async server components** using ISR with 60-second revalidation. Data is fetched from Contentful via `lib/contentful.ts`, which exports functions like `getFieldNotes()`, `getFieldNoteBySlug()`, `getTools()`, and `getGlobalSettings()`. Parallel fetching with `Promise.all()` is used on pages that need multiple data sources.
+All pages are **async server components** using ISR with 60-second revalidation. Data is fetched from Contentful via `lib/contentful.ts`, which exports: `getAllFieldNotes()`, `getFeaturedFieldNote()`, `getFieldNoteBySlug()`, `getAllFieldNoteSlugs()`, `getAllTools()`, `getActiveTools()`, and `getGlobalSettings()`. Parallel fetching with `Promise.all()` is used on pages that need multiple data sources.
 
 ### Contentful Content Types
 
@@ -56,7 +56,7 @@ All pages are **async server components** using ISR with 60-second revalidation.
 
 ### Styling
 
-Uses Tailwind CSS 4 + CSS custom properties for theming. The design system colors are defined in `app/globals.css` (e.g., `--ink`, `--paper`, `--accent`, `--muted`). shadcn/ui components live in `components/ui/` and are configured via `components.json` (new-york style, neutral base color). Regular CSS classes are used — **no styled-jsx** (was removed to fix Vercel build issues).
+Uses Tailwind CSS 4 + CSS custom properties for theming. The design system colors are defined in `app/globals.css` (e.g., `--ink`, `--paper`, `--accent`, `--muted`). Three Google Fonts are loaded in `app/layout.tsx` via CSS variables: `--font-playfair` (Playfair Display), `--font-lora` (Lora), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` and are configured via `components.json` (new-york style, neutral base color). Regular CSS classes are used — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics is included in the root layout.
 
 ### Path Alias
 
@@ -64,5 +64,5 @@ Uses Tailwind CSS 4 + CSS custom properties for theming. The design system color
 
 ### Build Notes
 
-- `next.config.mjs` has `typescript.ignoreBuildErrors: true` and `images.unoptimized: true`
+- `next.config.mjs` has `typescript.ignoreBuildErrors: true` and optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful) and Vercel blob storage
 - The `Header` component is a client component (uses `usePathname`); everything else is server-rendered
