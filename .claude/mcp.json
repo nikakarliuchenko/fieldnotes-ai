@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "contentful": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/contentful-mcp-server",
+        "--space-id",
+        "7nlepvg580vx",
+        "--access-token",
+        "CFPAT-u4YncOL1UhrRESC04In5fRwXsTxiJ-VbscXKyBeYq9Y"
+      ]
+    }
+  }
+}
