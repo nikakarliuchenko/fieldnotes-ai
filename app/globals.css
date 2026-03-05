@@ -67,6 +67,10 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0 24px;
 }
 
+.container.container-wide {
+  max-width: 900px;
+}
+
 /* Entry type tags */
 .tag {
   font-family: var(--font-mono);

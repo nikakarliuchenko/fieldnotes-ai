@@ -85,7 +85,7 @@ export default async function NotePage({ params }: PageProps) {
   const nextNote = currentIndex > 0 ? allNotes[currentIndex - 1] : null
 
   return (
-    <main className="container">
+    <main className="container container-wide">
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <article className="note-article animate-fade-in-up">
