@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getGlobalSettings()
   const seo = settings?.defaultSeo
 
-  const title = seo?.ogTitle || 'FieldNotes AI — What happens when content infrastructure meets AI'
+  const title = seo?.ogTitle || 'FieldNotes AI — Content infrastructure meets AI'
   const description = seo?.ogDescription || 'A practitioner journal documenting real-time AI development. Field notes on building with LLMs, Contentful, and modern web infrastructure.'
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'
 
