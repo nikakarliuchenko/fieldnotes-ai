@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getGlobalSettings, getFeaturedFieldNote, getAllFieldNotes, getActiveTools } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -7,6 +8,39 @@ import AboutStrip from '@/components/AboutStrip'
 import SectionLabel from '@/components/SectionLabel'
 
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getGlobalSettings()
+  const seo = settings?.defaultSeo
+
+  const title = seo?.ogTitle || 'FieldNotes AI — What happens when content infrastructure meets AI'
+  const description = seo?.ogDescription || 'A practitioner journal documenting real-time AI development. Field notes on building with LLMs, Contentful, and modern web infrastructure.'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: baseUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: baseUrl,
+      type: 'website',
+      ...(seo?.ogImageUrl && {
+        images: [
+          {
+            url: seo.ogImageUrl,
+            width: 1200,
+            height: 630,
+            alt: seo?.ogImageAltText || 'FieldNotes AI',
+          },
+        ],
+      }),
+    },
+  }
+}
 
 export default async function HomePage() {
   const [settings, featuredNote, allNotes, tools] = await Promise.all([

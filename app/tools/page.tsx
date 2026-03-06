@@ -9,9 +9,22 @@ export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getGlobalSettings()
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'
+  const title = `My Tools | ${settings?.siteName || 'FieldNotes AI'}`
+  const description = 'Tools and technologies used in exploring the intersection of content infrastructure and AI.'
+
   return {
-    title: `My Tools | ${settings?.siteName || 'FieldNotes AI'}`,
-    description: 'Tools and technologies used in exploring the intersection of content infrastructure and AI.',
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/tools`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/tools`,
+      type: 'website',
+    },
   }
 }
 

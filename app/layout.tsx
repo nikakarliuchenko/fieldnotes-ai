@@ -23,23 +23,31 @@ const ibmPlexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'FieldNotes AI',
-  description: 'A personal journal by Nika Karliuchenko documenting what happens when content infrastructure meets AI.',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      { url: '/fieldnotes-ai-favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'),
+  title: {
+    default: 'FieldNotes AI',
+    template: '%s | FieldNotes AI',
+  },
+  description: 'A practitioner journal documenting real-time AI development. Field notes on building with LLMs, Contentful, and modern web infrastructure.',
+  openGraph: {
+    siteName: 'FieldNotes AI',
+    type: 'website',
+    images: [
+      {
+        url: '/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'FieldNotes AI',
+      },
     ],
   },
-  manifest: '/manifest.webmanifest',
-  openGraph: {
-    title: 'FieldNotes AI',
-    description: 'A personal journal by Nika Karliuchenko documenting what happens when content infrastructure meets AI.',
-    images: [{ url: '/icon-512.png', width: 512, height: 512 }],
+  twitter: {
+    card: 'summary_large_image',
+    site: '@nikakarl',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 }
 
