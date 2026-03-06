@@ -23,19 +23,46 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const note = await getFieldNoteBySlug(slug)
   const settings = await getGlobalSettings()
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'
 
   if (!note) {
     return { title: 'Note Not Found' }
   }
 
+  const seo = note.seo
+  const title = seo?.ogTitle || note.title
+  const description = seo?.ogDescription || note.dek || ''
+
   return {
-    title: note.seo?.ogTitle || `${note.title} | ${settings?.siteName || 'FieldNotes AI'}`,
-    description: note.seo?.ogDescription || note.dek || '',
+    title: seo?.ogTitle || `${note.title} | ${settings?.siteName || 'FieldNotes AI'}`,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/notes/${slug}`,
+    },
+    ...(seo?.robotsNoIndex !== undefined || seo?.robotsNoFollow !== undefined
+      ? {
+          robots: {
+            index: !seo?.robotsNoIndex,
+            follow: !seo?.robotsNoFollow,
+          },
+        }
+      : {}),
     openGraph: {
-      title: note.seo?.ogTitle || note.title,
-      description: note.seo?.ogDescription || note.dek || '',
-      type: (note.seo?.ogType as 'article') || 'article',
-      images: note.seo?.ogImageUrl ? [note.seo.ogImageUrl] : undefined,
+      title,
+      description,
+      url: `${baseUrl}/notes/${slug}`,
+      type: 'article',
+      publishedTime: note.publishedDate,
+      ...(seo?.ogImageUrl && {
+        images: [
+          {
+            url: seo.ogImageUrl,
+            width: 1200,
+            height: 630,
+            alt: seo?.ogImageAltText || note.title,
+          },
+        ],
+      }),
     },
   }
 }
