@@ -66,3 +66,29 @@ Uses Tailwind CSS 4 + CSS custom properties for theming. The design system color
 
 - `next.config.mjs` has `typescript.ignoreBuildErrors: true` and optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful) and Vercel blob storage
 - The `Header` component is a client component (uses `usePathname`); everything else is server-rendered
+
+## Security Rules
+
+### MCP Config Files
+
+- `.claude/` is in `.gitignore` and must stay there. Never remove it.
+- MCP config files (`.claude/mcp.json`) contain API tokens and must never be committed.
+- Store MCP configs at `~/.claude/` (home directory level) not inside the project folder.
+
+### Before Making Repo Public
+
+Always run this to check for exposed secrets in full git history:
+
+```bash
+git log --all -p | grep -E "CFPAT|CTFL|sk-|ghp_|token|secret|password|api_key" -i
+```
+
+Empty output means clean. If anything shows up, do not make the repo public.
+
+### Security Audit Rules
+
+When auditing this repo for secrets, scan:
+
+- All git history, not just current file tree
+- Tool-specific config directories (.claude/, .cursor/, etc.)
+- Any file that was committed and later deleted
