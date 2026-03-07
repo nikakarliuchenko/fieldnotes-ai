@@ -22,7 +22,7 @@ There are no tests configured in this project.
 - `CONTENTFUL_SPACE_ID` — Contentful workspace ID
 - `CONTENTFUL_ACCESS_TOKEN` — Contentful delivery API token
 - `CONTENTFUL_ENVIRONMENT` — Contentful environment (defaults to 'master')
-- `NEXT_PUBLIC_SITE_URL` — Site URL for sitemap generation (defaults to https://fieldnotes.ai)
+- `NEXT_PUBLIC_SITE_URL` — Site URL for sitemap generation (defaults to https://fieldnotes-ai.com)
 
 When Contentful env vars are missing, the app serves hardcoded default/demo content defined in `lib/contentful.ts`.
 
