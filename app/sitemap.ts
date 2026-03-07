@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { getAllFieldNotes } from '@/lib/contentful'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fieldnotes.ai'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fieldnotes-ai.com'
   
   const notes = await getAllFieldNotes()
   
