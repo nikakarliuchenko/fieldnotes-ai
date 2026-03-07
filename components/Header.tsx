@@ -59,7 +59,7 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
         </Link>
         <div className="header-photo-container">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_6663-uErCtyFxNVjSM7dYKeROkpSDDJjF15.jpeg"
+            src="/nika-karliuchenko.jpg"
             alt="Nika Karliuchenko"
             fill
             className="header-photo"
