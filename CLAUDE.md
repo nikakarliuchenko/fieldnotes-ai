@@ -22,7 +22,7 @@ There are no tests configured in this project.
 - `CONTENTFUL_SPACE_ID` — Contentful workspace ID
 - `CONTENTFUL_ACCESS_TOKEN` — Contentful delivery API token
 - `CONTENTFUL_ENVIRONMENT` — Contentful environment (defaults to 'master')
-- `NEXT_PUBLIC_SITE_URL` — Site URL for sitemap generation (defaults to https://fieldnotes-ai.com)
+- `NEXT_PUBLIC_SITE_URL` — Site URL for sitemap generation (defaults to https://www.fieldnotes-ai.com)
 
 When Contentful env vars are missing, the app serves hardcoded default/demo content defined in `lib/contentful.ts`.
 
@@ -45,6 +45,7 @@ All pages are **async server components** using ISR with 60-second revalidation.
 - `lib/types.ts` — TypeScript interfaces for Contentful and parsed types
 - `components/RichText.tsx` — Contentful rich text document renderer
 - `app/globals.css` — Design system with CSS custom properties and animations
+- `styles/globals.css` — shadcn/ui base styles (Tailwind + tw-animate-css)
 
 ### Routes
 
@@ -53,10 +54,11 @@ All pages are **async server components** using ISR with 60-second revalidation.
 - `/notes/[slug]` — Individual note detail (uses `generateStaticParams`)
 - `/tools` — Tools directory
 - `app/sitemap.ts` — Dynamic XML sitemap
+- `app/robots.ts` — Robots.txt generation
 
 ### Styling
 
-Uses Tailwind CSS 4 + CSS custom properties for theming. The design system colors are defined in `app/globals.css` (e.g., `--ink`, `--paper`, `--accent`, `--muted`). Three Google Fonts are loaded in `app/layout.tsx` via CSS variables: `--font-playfair` (Playfair Display), `--font-lora` (Lora), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` and are configured via `components.json` (new-york style, neutral base color). Regular CSS classes are used — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics is included in the root layout.
+Uses Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/globals.css` (design system with `--ink`, `--paper`, `--accent`, `--muted` tokens) and `styles/globals.css` (shadcn/ui base). Three Google Fonts loaded in `app/layout.tsx` via CSS variables: `--font-playfair` (Playfair Display), `--font-lora` (Lora), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` and are configured via `components.json` (new-york style, neutral base color). Regular CSS classes are used — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics is included in the root layout. Uses Next.js 16 with React 19.
 
 ### Path Alias
 
@@ -64,7 +66,7 @@ Uses Tailwind CSS 4 + CSS custom properties for theming. The design system color
 
 ### Build Notes
 
-- `next.config.mjs` has `typescript.ignoreBuildErrors: true` and optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful) and Vercel blob storage
+- `next.config.mjs` has `typescript.ignoreBuildErrors: true` and optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful)
 - The `Header` component is a client component (uses `usePathname`); everything else is server-rendered
 
 ## Security Rules
