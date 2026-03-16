@@ -120,6 +120,7 @@ export interface ParsedTool {
   status: 'Active' | 'Testing' | 'Retired'
   sortOrder: number
   simpleIconSlug?: string
+  notes?: string
 }
 
 export interface ParsedFieldNote {

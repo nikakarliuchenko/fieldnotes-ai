@@ -143,9 +143,7 @@ export default async function NotePage({ params }: PageProps) {
           </h2>
           <div className="tools-grid">
             {note.relatedTools.map((tool) => (
-              <div key={tool.slug} className="tool-cell">
-                <ToolCard tool={tool} />
-              </div>
+              <ToolCard key={tool.slug} tool={tool} />
             ))}
           </div>
         </aside>

@@ -87,9 +87,7 @@ export default async function HomePage() {
           <SectionLabel>My Tools</SectionLabel>
           <div className="tools-grid">
             {tools.map((tool) => (
-              <div key={tool.slug} className="tool-cell">
-                <ToolCard tool={tool} />
-              </div>
+              <ToolCard key={tool.slug} tool={tool} />
             ))}
           </div>
         </section>
