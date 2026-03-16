@@ -41,7 +41,7 @@ const options: Options = {
       return (
         <figure className="my-8">
           <img src={url} alt={alt} className="w-full rounded" loading="lazy" />
-          {alt && <figcaption className="mt-2 text-sm text-center" style={{ color: 'var(--muted)' }}>{alt}</figcaption>}
+          {alt && <figcaption className="mt-2 text-sm text-center" style={{ color: 'var(--ink-2)' }}>{alt}</figcaption>}
         </figure>
       )
     },
