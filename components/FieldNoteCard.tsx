@@ -13,7 +13,7 @@ export default function FieldNoteCard({ note, variant = 'list' }: FieldNoteCardP
       <article className="featured-note">
         <div className="featured-note-header">
           <span className="entry-number">{formatEntryNumber(note.entryNumber)}</span>
-          <span className={`tag ${getTagClass(note.entryType)}`}>{note.entryType}</span>
+          <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
           <span className="entry-date">{formatDate(note.publishedDate)}</span>
         </div>
 
@@ -42,7 +42,7 @@ export default function FieldNoteCard({ note, variant = 'list' }: FieldNoteCardP
         {note.dek && <p className="note-excerpt">{note.dek}</p>}
       </div>
       <div className="note-meta">
-        <span className={`tag ${getTagClass(note.entryType)}`}>{note.entryType}</span>
+        <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
         <span className="note-date">{formatDate(note.publishedDate)}</span>
       </div>
 

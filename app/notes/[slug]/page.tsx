@@ -93,7 +93,7 @@ export default async function NotePage({ params }: PageProps) {
         {/* Entry Header */}
         <div className="note-header">
           <span className="entry-number">{formatEntryNumber(note.entryNumber)}</span>
-          <span className={`tag ${getTagClass(note.entryType)}`}>{note.entryType}</span>
+          <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
           <span className="entry-date">{formatDate(note.publishedDate)}</span>
           {note.readingTimeMinutes && (
             <span className="reading-time">{note.readingTimeMinutes} min read</span>

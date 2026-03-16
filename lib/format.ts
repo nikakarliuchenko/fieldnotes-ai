@@ -14,13 +14,13 @@ export function formatEntryNumber(num: number): string {
 export function getTagClass(entryType: string): string {
   switch (entryType) {
     case 'Learning':
-      return 'tag-learning'
+      return 'learning'
     case 'Building':
-      return 'tag-building'
+      return 'building'
     case 'Testing':
-      return 'tag-testing'
+      return 'testing'
     case 'Observing':
     default:
-      return 'tag-observing'
+      return 'observing'
   }
 }

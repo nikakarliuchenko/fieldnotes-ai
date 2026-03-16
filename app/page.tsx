@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { getGlobalSettings, getFeaturedFieldNote, getAllFieldNotes, getActiveTools } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import FieldNoteCard from '@/components/FieldNoteCard'
+import FeaturedNote from '@/components/FeaturedNote'
+import NoteListItem from '@/components/NoteListItem'
 import ToolCard from '@/components/ToolCard'
 import AboutStrip from '@/components/AboutStrip'
 import SectionLabel from '@/components/SectionLabel'
@@ -50,44 +51,39 @@ export default async function HomePage() {
     getActiveTools(),
   ])
 
-  // Filter out the featured note from the list
   const otherNotes = allNotes.filter(
     (note) => note.slug !== featuredNote?.slug
   )
 
   return (
-    <main className="container">
+    <main id="main-content" className="container">
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      {/* Featured Article */}
       {featuredNote && (
-        <section className="animate-fade-in-up">
-          <FieldNoteCard note={featuredNote} variant="featured" />
+        <section aria-label="Featured note">
+          <FeaturedNote note={featuredNote} />
         </section>
       )}
 
-      {/* Notes List */}
       {otherNotes.length > 0 && (
-        <section className="notes-section animate-fade-in-up animation-delay-100">
+        <section className="notes-section" aria-label="Recent notes">
           <SectionLabel>Recent Field Notes</SectionLabel>
           <div className="notes-list">
             {otherNotes.map((note) => (
-              <FieldNoteCard key={note.slug} note={note} variant="list" />
+              <NoteListItem key={note.slug} note={note} />
             ))}
           </div>
         </section>
       )}
 
-      {/* Empty State */}
       {!featuredNote && otherNotes.length === 0 && (
-        <section className="empty-state animate-fade-in-up">
+        <section className="empty-state">
           <p>No notes yet — check back soon.</p>
         </section>
       )}
 
-      {/* Tools Grid */}
       {tools.length > 0 && (
-        <section className="tools-section animate-fade-in-up animation-delay-200">
+        <section className="tools-section" aria-label="Tools">
           <SectionLabel>My Tools</SectionLabel>
           <div className="tools-grid">
             {tools.map((tool) => (
@@ -99,13 +95,9 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* About Strip */}
-      <div className="animate-fade-in-up animation-delay-300">
-        <AboutStrip />
-      </div>
+      <AboutStrip />
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-
     </main>
   )
 }
