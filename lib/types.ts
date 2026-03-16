@@ -137,4 +137,5 @@ export interface ParsedFieldNote {
   sessionCost?: string
   totalTokens?: string
   modelUsed?: string
+  updatedAt?: string
 }

@@ -1,13 +1,14 @@
 import { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getGlobalSettings, getFieldNoteBySlug, getAllFieldNoteSlugs, getAllFieldNotes } from '@/lib/contentful'
 import { formatDate, formatEntryNumber, getTagClass } from '@/lib/format'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import RichText from '@/components/RichText'
+import Breadcrumb from '@/components/Breadcrumb'
+import StatsStrip from '@/components/StatsStrip'
+import ArticleNav from '@/components/ArticleNav'
 import ToolCard from '@/components/ToolCard'
-import SectionLabel from '@/components/SectionLabel'
 
 export const revalidate = 60
 
@@ -86,72 +87,71 @@ export default async function NotePage({ params }: PageProps) {
   const nextNote = currentIndex > 0 ? allNotes[currentIndex - 1] : null
 
   return (
-    <main className="container container-wide">
+    <main className="col">
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      <article className="note-article animate-fade-in-up">
-        {/* Entry Header */}
-        <div className="note-header">
-          <span className="entry-number">{formatEntryNumber(note.entryNumber)}</span>
-          <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
-          <span className="entry-date">{formatDate(note.publishedDate)}</span>
-          {note.readingTimeMinutes && (
-            <span className="reading-time">{note.readingTimeMinutes} min read</span>
-          )}
-        </div>
+      <Breadcrumb items={[
+        { label: 'Field Notes', href: '/' },
+        { label: formatEntryNumber(note.entryNumber) },
+      ]} />
 
-        {/* Title */}
-        <h1 className="note-title">{note.title}</h1>
-
-        {/* Dek */}
-        {note.dek && (
-          <p className="note-dek">{note.dek}</p>
-        )}
-
-        {/* Body */}
-        {note.body && (
-          <div className="note-body">
-            <RichText content={note.body} showDropCap />
-          </div>
-        )}
-
-        {/* Related Tools */}
-        {note.relatedTools && note.relatedTools.length > 0 && (
-          <section className="related-tools animate-fade-in-up animation-delay-100">
-            <SectionLabel>Tools Mentioned</SectionLabel>
-            <div className="tools-grid">
-              {note.relatedTools.map((tool) => (
-                <div key={tool.slug} className="tool-cell">
-                  <ToolCard tool={tool} />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Navigation */}
-        <nav className="note-nav animate-fade-in-up animation-delay-200">
-          <div className="nav-prev">
-            {prevNote && (
-              <Link href={`/notes/${prevNote.slug}`} className="nav-link">
-                <span className="nav-label">&larr; Previous</span>
-                <span className="nav-title">{prevNote.title}</span>
-              </Link>
+      <article>
+        <header className="art-header">
+          <div className="art-meta">
+            <span className="art-num">{formatEntryNumber(note.entryNumber)}</span>
+            <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
+            {note.sessionCost && (
+              <span className="art-cost">Session cost: {note.sessionCost}</span>
             )}
+            <time className="art-date" dateTime={note.publishedDate}>
+              {formatDate(note.publishedDate)}
+            </time>
           </div>
-          <div className="nav-next">
-            {nextNote && (
-              <Link href={`/notes/${nextNote.slug}`} className="nav-link">
-                <span className="nav-label">Next &rarr;</span>
-                <span className="nav-title">{nextNote.title}</span>
-              </Link>
+
+          <h1 className="art-title">{note.title}</h1>
+
+          {note.dek && <p className="art-lede">{note.dek}</p>}
+
+          <div className="art-byline">
+            <span>By <a href="/">Nika Karliuchenko</a></span>
+            <span className="art-byline-sep">&middot;</span>
+            {note.readingTimeMinutes && (
+              <>
+                <span>{note.readingTimeMinutes} min read</span>
+                <span className="art-byline-sep">&middot;</span>
+              </>
             )}
+            <time dateTime={note.publishedDate}>{formatDate(note.publishedDate)}</time>
           </div>
-        </nav>
+        </header>
+
+        <StatsStrip
+          sessionCost={note.sessionCost}
+          totalTokens={note.totalTokens}
+          modelUsed={note.modelUsed}
+        />
+
+        {note.body && <RichText content={note.body} showDropCap />}
+
+        <ArticleNav prevNote={prevNote} nextNote={nextNote} />
       </article>
 
-      <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
+      {note.relatedTools && note.relatedTools.length > 0 && (
+        <aside>
+          <h2 className="art-body" style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
+            Tools Mentioned
+          </h2>
+          <div className="tools-grid">
+            {note.relatedTools.map((tool) => (
+              <div key={tool.slug} className="tool-cell">
+                <ToolCard tool={tool} />
+              </div>
+            ))}
+          </div>
+        </aside>
+      )}
 
+      <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
     </main>
   )
 }

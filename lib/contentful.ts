@@ -105,6 +105,7 @@ function parseFieldNote(note: ResolvedEntry<IFieldNoteSkeleton>): ParsedFieldNot
     sessionCost: note.fields.sessionCost,
     totalTokens: note.fields.totalTokens,
     modelUsed: note.fields.modelUsed,
+    updatedAt: note.sys.updatedAt,
   }
 }
 
