@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getGlobalSettings, getFieldNoteBySlug, getAllFieldNoteSlugs, getAllFieldNotes } from '@/lib/contentful'
+import { formatDate, formatEntryNumber, getTagClass } from '@/lib/format'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import RichText from '@/components/RichText'
@@ -64,33 +65,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         ],
       }),
     },
-  }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
-function formatEntryNumber(num: number): string {
-  return `#${String(num).padStart(3, '0')}`
-}
-
-function getTagClass(entryType: string): string {
-  switch (entryType) {
-    case 'Learning':
-      return 'tag-learning'
-    case 'Building':
-      return 'tag-building'
-    case 'Testing':
-      return 'tag-testing'
-    case 'Observing':
-    default:
-      return 'tag-observing'
   }
 }
 
