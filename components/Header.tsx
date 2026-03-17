@@ -31,7 +31,16 @@ interface HeaderProps {
   socialLinks?: ParsedSocialLink[]
 }
 
+const defaultGitHub: ParsedSocialLink = {
+  platform: 'GitHub',
+  url: 'https://github.com/nikakarliuchenko',
+}
+
 export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
+  const links = socialLinks.some((l) => l.platform === 'GitHub')
+    ? socialLinks
+    : [...socialLinks, defaultGitHub]
+
   return (
     <nav className="nav">
       <div className="nav-inner">
@@ -47,8 +56,8 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
             </li>
           ))}
         </ul>
-        <div className="nav-r">
-          {socialLinks.map((link) => {
+        <div className="nav-r" style={{ marginLeft: 'auto' }}>
+          {links.map((link) => {
             const icon = socialIcons[link.platform]
             if (!icon) return null
             return (

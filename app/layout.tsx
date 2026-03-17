@@ -59,7 +59,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
-      <body>
+      <body className="page-wrap">
         <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}` }} />
         <a href="#main-content" className="skip-link">Skip to main content</a>
         {children}

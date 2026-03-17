@@ -66,7 +66,17 @@ body {
   background-color: var(--bg);
   color: var(--ink);
   line-height: 1.6;
-  min-height: 100vh;
+}
+
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.page-wrap > main,
+.page-wrap .col {
+  flex: 1;
 }
 
 a {
@@ -1029,12 +1039,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Footer --- */
 .footer {
-  background: var(--ink);
-}
-
-.dark .footer {
-  background: #111;
-  border-top: 1px solid var(--border);
+  background: var(--bg);
+  border-top: 1px solid var(--border-f);
 }
 
 .footer-inner {
@@ -1050,8 +1056,11 @@ h1, h2, h3, h4, h5, h6 {
 .f-logo {
   font-family: var(--serif);
   font-size: 14px;
-  font-style: italic;
-  color: rgba(250, 249, 246, 0.6);
+  color: var(--ink);
+}
+
+.f-logo em {
+  color: var(--accent);
 }
 
 .f-links {
@@ -1064,20 +1073,20 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.06em;
-  color: #555;
+  color: var(--ink-3);
   transition: color 0.15s;
   display: inline-flex;
   align-items: center;
 }
 
 .f-links a:hover {
-  color: rgba(250, 249, 246, 0.7);
+  color: var(--accent);
 }
 
 .f-copy {
   font-family: var(--mono);
   font-size: 10px;
-  color: #444;
+  color: var(--ink-3);
 }
 
 /* Legacy footer (kept until refactor) */
@@ -1125,9 +1134,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Site Header (home page only) --- */
 .site-header {
-  padding: 20px clamp(16px, 4vw, 48px) 0;
+  width: 100%;
+  padding: 36px clamp(16px, 4vw, 48px) 0;
   max-width: var(--col);
   margin: 0 auto;
+  text-align: left;
 }
 
 .sh-eyebrow {
@@ -1203,6 +1214,7 @@ h1.sh-wordmark span {
   font-style: normal;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-f);
+  margin-bottom: 36px;
 }
 
 .sh-byline a {

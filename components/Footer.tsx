@@ -28,13 +28,22 @@ interface FooterProps {
   socialLinks?: ParsedSocialLink[]
 }
 
+const defaultGitHub: ParsedSocialLink = {
+  platform: 'GitHub',
+  url: 'https://github.com/nikakarliuchenko',
+}
+
 export default function Footer({ copyright, socialLinks = [] }: FooterProps) {
+  const links = socialLinks.some((l) => l.platform === 'GitHub')
+    ? socialLinks
+    : [...socialLinks, defaultGitHub]
+
   return (
     <footer className="footer">
       <div className="footer-inner">
         <span className="f-logo">FieldNotes<em>AI</em></span>
         <div className="f-links">
-          {socialLinks.map((link) => {
+          {links.map((link) => {
             const icon = socialIcons[link.platform]
             if (!icon) return null
             return (

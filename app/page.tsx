@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getGlobalSettings, getFeaturedFieldNote, getAllFieldNotes, getActiveTools } from '@/lib/contentful'
 import Header from '@/components/Header'
@@ -61,7 +62,16 @@ export default async function HomePage() {
         <div className="sh-eyebrow">VOL. I &nbsp;&middot;&nbsp; BOSTON, MA &nbsp;&middot;&nbsp; 2026</div>
         <div className="sh-top">
           <h1 className="sh-wordmark">FieldNotes<span>AI</span></h1>
-          <div className="sh-photo" aria-label="Nika Karliuchenko">N</div>
+          <div className="sh-photo" aria-label="Nika Karliuchenko">
+            <Image
+              src="/nika.jpg"
+              alt="Nika Karliuchenko"
+              width={76}
+              height={76}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              priority
+            />
+          </div>
         </div>
         <p className="sh-sub">What happens when content infrastructure meets AI</p>
         <address className="sh-byline">
@@ -78,7 +88,10 @@ export default async function HomePage() {
 
         {otherNotes.length > 0 && (
           <section className="notes-section" aria-label="Recent notes">
-            <div className="sec-hd"><span>Recent Field Notes</span></div>
+            <div className="sec-hd">
+              <span>Recent Field Notes</span>
+              <a href="/notes" className="sec-view-all">View all →</a>
+            </div>
             <div className="notes-list">
               {otherNotes.map((note) => (
                 <NoteListItem key={note.slug} note={note} />
