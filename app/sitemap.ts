@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((note) => note.seo?.sitemap !== false)
     .map((note) => ({
       url: `${baseUrl}/notes/${note.slug}`,
-      lastModified: new Date(note.publishedDate),
+      lastModified: new Date(note.updatedAt || note.publishedDate),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     }))

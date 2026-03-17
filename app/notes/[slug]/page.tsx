@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getGlobalSettings, getFieldNoteBySlug, getAllFieldNoteSlugs, getAllFieldNotes } from '@/lib/contentful'
-import { formatDate, formatEntryNumber, getTagClass } from '@/lib/format'
+import { formatDate, formatEntryNumber, getTagClass, estimateWordCount } from '@/lib/format'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import RichText from '@/components/RichText'
@@ -86,8 +86,35 @@ export default async function NotePage({ params }: PageProps) {
   const prevNote = currentIndex < allNotes.length - 1 ? allNotes[currentIndex + 1] : null
   const nextNote = currentIndex > 0 ? allNotes[currentIndex - 1] : null
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: note.title,
+    description: note.dek || '',
+    datePublished: note.publishedDate,
+    dateModified: note.updatedAt || note.publishedDate,
+    author: {
+      '@type': 'Person',
+      name: 'Nika Karliuchenko',
+      url: 'https://www.fieldnotes-ai.com',
+    },
+    publisher: {
+      '@type': 'Person',
+      name: 'Nika Karliuchenko',
+    },
+    url: `${baseUrl}/notes/${slug}`,
+    mainEntityOfPage: `${baseUrl}/notes/${slug}`,
+    ...(note.body ? { wordCount: estimateWordCount(note.body) } : {}),
+  }
+
   return (
-    <main className="col">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main className="col">
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <Breadcrumb items={[
@@ -151,5 +178,6 @@ export default async function NotePage({ params }: PageProps) {
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
     </main>
+    </>
   )
 }
