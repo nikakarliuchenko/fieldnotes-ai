@@ -34,27 +34,28 @@ export default async function NotesPage() {
   ])
 
   return (
-    <main className="container">
+    <>
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      <section className="notes-page animate-fade-in-up">
-        <h2 className="section-label">All Field Notes</h2>
-        
-        {notes.length > 0 ? (
-          <div className="notes-list">
-            {notes.map((note) => (
-              <NoteListItem key={note.slug} note={note} />
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>No notes yet — check back soon.</p>
-          </div>
-        )}
-      </section>
+      <main className="col">
+        <section className="notes-page animate-fade-in-up">
+          <div className="sec-hd"><span>All Field Notes</span></div>
+
+          {notes.length > 0 ? (
+            <div className="notes-list">
+              {notes.map((note) => (
+                <NoteListItem key={note.slug} note={note} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p>No notes yet — check back soon.</p>
+            </div>
+          )}
+        </section>
+      </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-
-    </main>
+    </>
   )
 }

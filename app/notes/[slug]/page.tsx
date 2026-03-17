@@ -114,70 +114,70 @@ export default async function NotePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="col">
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      <Breadcrumb items={[
-        { label: 'Field Notes', href: '/' },
-        { label: formatEntryNumber(note.entryNumber) },
-      ]} />
+      <main className="col">
+        <Breadcrumb items={[
+          { label: 'Field Notes', href: '/' },
+          { label: formatEntryNumber(note.entryNumber) },
+        ]} />
 
-      <article>
-        <header className="art-header">
-          <div className="art-meta">
-            <span className="art-num">{formatEntryNumber(note.entryNumber)}</span>
-            <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
-            {note.sessionCost && (
-              <span className="art-cost">Session cost: {note.sessionCost}</span>
-            )}
-            <time className="art-date" dateTime={note.publishedDate}>
-              {formatDate(note.publishedDate)}
-            </time>
-          </div>
+        <article>
+          <header className="art-header">
+            <div className="art-meta">
+              <span className="art-num">{formatEntryNumber(note.entryNumber)}</span>
+              <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
+              {note.sessionCost && (
+                <span className="art-cost">Session cost: {note.sessionCost}</span>
+              )}
+              <time className="art-date" dateTime={note.publishedDate}>
+                {formatDate(note.publishedDate)}
+              </time>
+            </div>
 
-          <h1 className="art-title">{note.title}</h1>
+            <h1 className="art-title">{note.title}</h1>
 
-          {note.dek && <p className="art-lede">{note.dek}</p>}
+            {note.dek && <p className="art-lede">{note.dek}</p>}
 
-          <div className="art-byline">
-            <span>By <a href="/">Nika Karliuchenko</a></span>
-            <span className="art-byline-sep">&middot;</span>
-            {note.readingTimeMinutes && (
-              <>
-                <span>{note.readingTimeMinutes} min read</span>
-                <span className="art-byline-sep">&middot;</span>
-              </>
-            )}
-            <time dateTime={note.publishedDate}>{formatDate(note.publishedDate)}</time>
-          </div>
-        </header>
+            <div className="art-byline">
+              <span>By <a href="/">Nika Karliuchenko</a></span>
+              <span className="art-byline-sep">&middot;</span>
+              {note.readingTimeMinutes && (
+                <>
+                  <span>{note.readingTimeMinutes} min read</span>
+                  <span className="art-byline-sep">&middot;</span>
+                </>
+              )}
+              <time dateTime={note.publishedDate}>{formatDate(note.publishedDate)}</time>
+            </div>
+          </header>
 
-        <StatsStrip
-          sessionCost={note.sessionCost}
-          totalTokens={note.totalTokens}
-          modelUsed={note.modelUsed}
-        />
+          <StatsStrip
+            sessionCost={note.sessionCost}
+            totalTokens={note.totalTokens}
+            modelUsed={note.modelUsed}
+          />
 
-        {note.body && <RichText content={note.body} showDropCap />}
+          {note.body && <RichText content={note.body} showDropCap />}
 
-        <ArticleNav prevNote={prevNote} nextNote={nextNote} />
-      </article>
+          <ArticleNav prevNote={prevNote} nextNote={nextNote} />
+        </article>
 
-      {note.relatedTools && note.relatedTools.length > 0 && (
-        <aside>
-          <h2 className="art-body" style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
-            Tools Mentioned
-          </h2>
-          <div className="tools-grid">
-            {note.relatedTools.map((tool) => (
-              <ToolCard key={tool.slug} tool={tool} />
-            ))}
-          </div>
-        </aside>
-      )}
+        {note.relatedTools && note.relatedTools.length > 0 && (
+          <aside>
+            <h2 className="art-body" style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
+              Tools Mentioned
+            </h2>
+            <div className="tools-grid">
+              {note.relatedTools.map((tool) => (
+                <ToolCard key={tool.slug} tool={tool} />
+              ))}
+            </div>
+          </aside>
+        )}
+      </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-    </main>
     </>
   )
 }

@@ -1111,48 +1111,94 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* --- SectionLabel (deprecated — kept until removed) --- */
-.section-label {
-  font-family: var(--serif);
-  font-size: 0.85rem;
-  color: var(--ink-2);
-  margin: 0 0 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  font-weight: 400;
+/* --- Site Header (home page only) --- */
+.site-header {
+  padding: clamp(20px, 3vw, 36px) clamp(16px, 4vw, 48px) 0;
+  max-width: var(--col);
+  margin: 0 auto;
 }
 
-/* --- AboutStrip (deprecated — kept until removed) --- */
-.about-strip {
+.sh-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+.sh-top {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 32px;
-  padding: 32px 0;
-  border-top: 1px solid var(--border);
-  margin-top: 48px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
-.about-bio {
-  font-family: var(--sans);
-  font-style: italic;
-  font-size: 0.85rem;
-  color: var(--ink-2);
-  line-height: 1.6;
-  margin: 0;
-  max-width: 500px;
-}
-
-.about-bio strong {
-  font-style: normal;
+h1.sh-wordmark {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--ink);
+  line-height: 1;
+  margin: 0;
 }
 
-@media (max-width: 640px) {
-  .about-strip {
-    flex-direction: column;
-    gap: 16px;
-  }
+h1.sh-wordmark span {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.sh-photo {
+  width: clamp(56px, 6vw, 76px);
+  height: clamp(56px, 6vw, 76px);
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid var(--bg-card);
+  box-shadow: 0 0 0 1px var(--border);
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+  color: white;
+}
+
+.sh-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sh-sub {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+  margin-bottom: 8px;
+}
+
+.sh-byline {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  font-style: normal;
+  padding-bottom: clamp(16px, 2vw, 28px);
+  border-bottom: 1px solid var(--border-f);
+}
+
+.sh-byline a {
+  color: var(--accent);
+}
+
+.sh-byline a:hover {
+  text-decoration: underline;
 }
 
 /* --- FieldNoteCard (featured) --- */

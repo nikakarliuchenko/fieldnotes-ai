@@ -36,23 +36,25 @@ export default async function ToolsPage() {
   const sortedTools = [...tools].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
-    <main className="col">
+    <>
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      <header className="page-header">
-        <div className="page-eyebrow">My Stack</div>
-        <h1 className="page-title">
-          The tools I actually use.<span> Updated as the stack evolves.</span>
-        </h1>
-        <p className="page-desc">
-          Every tool on this page is something I use in the field. Some are daily drivers.
-          Some I&apos;m still figuring out. The pulsing dot marks what I&apos;m currently working with most.
-        </p>
-      </header>
+      <main className="col">
+        <header className="page-header">
+          <div className="page-eyebrow">My Stack</div>
+          <h1 className="page-title">
+            The tools I actually use.<span> Updated as the stack evolves.</span>
+          </h1>
+          <p className="page-desc">
+            Every tool on this page is something I use in the field. Some are daily drivers.
+            Some I&apos;m still figuring out. The pulsing dot marks what I&apos;m currently working with most.
+          </p>
+        </header>
 
-      <ToolsContent tools={sortedTools} />
+        <ToolsContent tools={sortedTools} />
+      </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-    </main>
+    </>
   )
 }

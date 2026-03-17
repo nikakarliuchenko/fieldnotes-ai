@@ -54,44 +54,58 @@ export default async function HomePage() {
   )
 
   return (
-    <main id="main-content" className="container">
+    <>
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      {featuredNote && (
-        <section aria-label="Featured note">
-          <FeaturedNote note={featuredNote} />
-        </section>
-      )}
+      <header className="site-header">
+        <div className="sh-eyebrow">VOL. I &nbsp;&middot;&nbsp; BOSTON, MA &nbsp;&middot;&nbsp; 2026</div>
+        <div className="sh-top">
+          <h1 className="sh-wordmark">FieldNotes<span>AI</span></h1>
+          <div className="sh-photo" aria-label="Nika Karliuchenko">N</div>
+        </div>
+        <p className="sh-sub">What happens when content infrastructure meets AI</p>
+        <address className="sh-byline">
+          By <a rel="author" href="/">Nika Karliuchenko</a>
+        </address>
+      </header>
 
-      {otherNotes.length > 0 && (
-        <section className="notes-section" aria-label="Recent notes">
-          <h2 className="section-label">Recent Field Notes</h2>
-          <div className="notes-list">
-            {otherNotes.map((note) => (
-              <NoteListItem key={note.slug} note={note} />
-            ))}
-          </div>
-        </section>
-      )}
+      <main id="main-content" className="col">
+        {featuredNote && (
+          <section aria-label="Featured note">
+            <FeaturedNote note={featuredNote} />
+          </section>
+        )}
 
-      {!featuredNote && otherNotes.length === 0 && (
-        <section className="empty-state">
-          <p>No notes yet — check back soon.</p>
-        </section>
-      )}
+        {otherNotes.length > 0 && (
+          <section className="notes-section" aria-label="Recent notes">
+            <div className="sec-hd"><span>Recent Field Notes</span></div>
+            <div className="notes-list">
+              {otherNotes.map((note) => (
+                <NoteListItem key={note.slug} note={note} />
+              ))}
+            </div>
+          </section>
+        )}
 
-      {tools.length > 0 && (
-        <section className="tools-section" aria-label="Tools">
-          <h2 className="section-label">My Tools</h2>
-          <div className="tools-grid">
-            {tools.map((tool) => (
-              <ToolCard key={tool.slug} tool={tool} />
-            ))}
-          </div>
-        </section>
-      )}
+        {!featuredNote && otherNotes.length === 0 && (
+          <section className="empty-state">
+            <p>No notes yet — check back soon.</p>
+          </section>
+        )}
+
+        {tools.length > 0 && (
+          <section className="tools-section" aria-label="Tools">
+            <div className="sec-hd"><span>My Tools</span></div>
+            <div className="tools-grid">
+              {tools.map((tool) => (
+                <ToolCard key={tool.slug} tool={tool} />
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-    </main>
+    </>
   )
 }
