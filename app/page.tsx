@@ -5,8 +5,6 @@ import Footer from '@/components/Footer'
 import FeaturedNote from '@/components/FeaturedNote'
 import NoteListItem from '@/components/NoteListItem'
 import ToolCard from '@/components/ToolCard'
-import AboutStrip from '@/components/AboutStrip'
-import SectionLabel from '@/components/SectionLabel'
 
 export const revalidate = 60
 
@@ -67,7 +65,7 @@ export default async function HomePage() {
 
       {otherNotes.length > 0 && (
         <section className="notes-section" aria-label="Recent notes">
-          <SectionLabel>Recent Field Notes</SectionLabel>
+          <h2 className="section-label">Recent Field Notes</h2>
           <div className="notes-list">
             {otherNotes.map((note) => (
               <NoteListItem key={note.slug} note={note} />
@@ -84,7 +82,7 @@ export default async function HomePage() {
 
       {tools.length > 0 && (
         <section className="tools-section" aria-label="Tools">
-          <SectionLabel>My Tools</SectionLabel>
+          <h2 className="section-label">My Tools</h2>
           <div className="tools-grid">
             {tools.map((tool) => (
               <ToolCard key={tool.slug} tool={tool} />
@@ -92,8 +90,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      <AboutStrip />
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
     </main>

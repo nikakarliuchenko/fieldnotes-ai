@@ -2,8 +2,7 @@ import { Metadata } from 'next'
 import { getGlobalSettings, getAllFieldNotes } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import FieldNoteCard from '@/components/FieldNoteCard'
-import SectionLabel from '@/components/SectionLabel'
+import NoteListItem from '@/components/NoteListItem'
 
 export const revalidate = 60
 
@@ -39,12 +38,12 @@ export default async function NotesPage() {
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <section className="notes-page animate-fade-in-up">
-        <SectionLabel>All Field Notes</SectionLabel>
+        <h2 className="section-label">All Field Notes</h2>
         
         {notes.length > 0 ? (
           <div className="notes-list">
             {notes.map((note) => (
-              <FieldNoteCard key={note.slug} note={note} variant="list" />
+              <NoteListItem key={note.slug} note={note} />
             ))}
           </div>
         ) : (
