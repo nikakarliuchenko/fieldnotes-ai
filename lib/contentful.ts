@@ -1,11 +1,12 @@
-import { createClient, Entry, Asset } from 'contentful'
+import { createClient, type Entry, type EntrySkeletonType } from 'contentful'
+import { BLOCKS } from '@contentful/rich-text-types'
 import type {
-  IGlobalSettingsFields,
-  IFieldNoteFields,
-  IToolFields,
-  INavigationItemFields,
-  ISocialLinkFields,
-  ISeoFields,
+  IGlobalSettingsSkeleton,
+  IFieldNoteSkeleton,
+  IToolSkeleton,
+  INavigationItemSkeleton,
+  ISocialLinkSkeleton,
+  ISeoSkeleton,
   ParsedGlobalSettings,
   ParsedFieldNote,
   ParsedTool,
@@ -14,20 +15,25 @@ import type {
   ParsedSeo,
 } from './types'
 
-// Create Contentful client
-const client = createClient({
-  space: process.env.CONTENTFUL_SPACE_ID!,
-  accessToken: process.env.CONTENTFUL_ACCESS_TOKEN!,
-  environment: process.env.CONTENTFUL_ENVIRONMENT || 'master',
-})
+// Resolved entry type — fields without locale wrapper
+type ResolvedEntry<T extends EntrySkeletonType> = Entry<T, undefined, string>
 
 // Helper to check if Contentful is configured
 function isContentfulConfigured(): boolean {
   return !!(process.env.CONTENTFUL_SPACE_ID && process.env.CONTENTFUL_ACCESS_TOKEN)
 }
 
+// Lazy Contentful client — only created when env vars are present
+function getClient() {
+  return createClient({
+    space: process.env.CONTENTFUL_SPACE_ID!,
+    accessToken: process.env.CONTENTFUL_ACCESS_TOKEN!,
+    environment: process.env.CONTENTFUL_ENVIRONMENT || 'master',
+  })
+}
+
 // Parse navigation item
-function parseNavigationItem(item: Entry<INavigationItemFields>): ParsedNavigationItem {
+function parseNavigationItem(item: ResolvedEntry<INavigationItemSkeleton>): ParsedNavigationItem {
   return {
     label: item.fields.label || '',
     url: item.fields.url || '/',
@@ -37,7 +43,7 @@ function parseNavigationItem(item: Entry<INavigationItemFields>): ParsedNavigati
 }
 
 // Parse social link
-function parseSocialLink(link: Entry<ISocialLinkFields>): ParsedSocialLink {
+function parseSocialLink(link: ResolvedEntry<ISocialLinkSkeleton>): ParsedSocialLink {
   return {
     platform: link.fields.platform || '',
     url: link.fields.url || '',
@@ -46,24 +52,27 @@ function parseSocialLink(link: Entry<ISocialLinkFields>): ParsedSocialLink {
 }
 
 // Parse SEO
-function parseSeo(seo: Entry<ISeoFields> | undefined): ParsedSeo | undefined {
+function parseSeo(seo: ResolvedEntry<ISeoSkeleton> | undefined): ParsedSeo | undefined {
   if (!seo?.fields) return undefined
+  const ogImage = seo.fields.ogImage
+  const imageUrl = ogImage && 'fields' in ogImage ? ogImage.fields?.file?.url : undefined
   return {
     ogTitle: seo.fields.ogTitle,
     ogDescription: seo.fields.ogDescription,
-    ogImageUrl: (seo.fields.ogImage as Asset)?.fields?.file?.url
-      ? `https:${(seo.fields.ogImage as Asset).fields.file.url}`
-      : undefined,
+    ogImageUrl: imageUrl ? `https:${imageUrl}` : undefined,
     ogImageAltText: seo.fields.ogImageAltText,
     ogType: seo.fields.ogType,
+    ogMetaKeywords: seo.fields.ogMetaKeywords,
     robotsNoIndex: seo.fields.robotsNoIndex,
     robotsNoFollow: seo.fields.robotsNoFollow,
+    robotsNoArchive: seo.fields.robotsNoArchive,
+    robotsUnavailableAfter: seo.fields.robotsUnavailableAfter,
     sitemap: seo.fields.sitemap,
   }
 }
 
 // Parse tool
-function parseTool(tool: Entry<IToolFields>): ParsedTool {
+function parseTool(tool: ResolvedEntry<IToolSkeleton>): ParsedTool {
   return {
     name: tool.fields.name || '',
     slug: tool.fields.slug || '',
@@ -73,11 +82,13 @@ function parseTool(tool: Entry<IToolFields>): ParsedTool {
     url: tool.fields.url,
     status: tool.fields.status || 'Active',
     sortOrder: tool.fields.sortOrder || 0,
+    simpleIconSlug: tool.fields.simpleIconSlug,
+    notes: tool.fields.notes,
   }
 }
 
 // Parse field note
-function parseFieldNote(note: Entry<IFieldNoteFields>): ParsedFieldNote {
+function parseFieldNote(note: ResolvedEntry<IFieldNoteSkeleton>): ParsedFieldNote {
   return {
     entryNumber: note.fields.entryNumber || 0,
     title: note.fields.title || '',
@@ -88,10 +99,14 @@ function parseFieldNote(note: Entry<IFieldNoteFields>): ParsedFieldNote {
     publishedDate: note.fields.publishedDate || new Date().toISOString(),
     readingTimeMinutes: note.fields.readingTimeMinutes,
     relatedTools: (note.fields.relatedTools || [])
-      .filter((t): t is Entry<IToolFields> => !!t?.fields)
+      .filter((t): t is ResolvedEntry<IToolSkeleton> => 'fields' in t && !!t.fields)
       .map(parseTool),
-    seo: parseSeo(note.fields.seo as Entry<ISeoFields>),
+    seo: note.fields.seo ? parseSeo(note.fields.seo as unknown as ResolvedEntry<ISeoSkeleton>) : undefined,
     featured: note.fields.featured || false,
+    sessionCost: note.fields.sessionCost,
+    totalTokens: note.fields.totalTokens,
+    modelUsed: note.fields.modelUsed,
+    updatedAt: note.sys.updatedAt,
   }
 }
 
@@ -102,7 +117,7 @@ export async function getGlobalSettings(): Promise<ParsedGlobalSettings | null> 
   }
 
   try {
-    const response = await client.getEntries<IGlobalSettingsFields>({
+    const response = await getClient().getEntries<IGlobalSettingsSkeleton>({
       content_type: 'globalSettings',
       limit: 1,
       include: 2,
@@ -113,20 +128,22 @@ export async function getGlobalSettings(): Promise<ParsedGlobalSettings | null> 
     }
 
     const settings = response.items[0]
+    const logoAsset = settings.fields.logo
+    const logoUrl = logoAsset && 'fields' in logoAsset ? logoAsset.fields?.file?.url : undefined
     return {
       siteName: settings.fields.siteName || 'FieldNotes AI',
       domain: settings.fields.domain,
+      logoUrl: logoUrl ? `https:${logoUrl}` : undefined,
       primaryNavigation: (settings.fields.primaryNavigation || [])
-        .filter((n): n is Entry<INavigationItemFields> => !!n?.fields)
-        .map(parseNavigationItem),
-      footerNavigation: (settings.fields.footerNavigation || [])
-        .filter((n): n is Entry<INavigationItemFields> => !!n?.fields)
+        .filter((n): n is ResolvedEntry<INavigationItemSkeleton> => 'fields' in n && !!n.fields)
         .map(parseNavigationItem),
       socialLinks: (settings.fields.socialLinks || [])
-        .filter((s): s is Entry<ISocialLinkFields> => !!s?.fields)
+        .filter((s): s is ResolvedEntry<ISocialLinkSkeleton> => 'fields' in s && !!s.fields)
         .map(parseSocialLink),
       copyright: settings.fields.copyright,
-      defaultSeo: parseSeo(settings.fields.defaultSeoMetadata as Entry<ISeoFields>),
+      defaultSeo: settings.fields.defaultSeoMetadata
+        ? parseSeo(settings.fields.defaultSeoMetadata as unknown as ResolvedEntry<ISeoSkeleton>)
+        : undefined,
     }
   } catch (error) {
     console.error('Error fetching global settings:', error)
@@ -141,9 +158,7 @@ function getDefaultGlobalSettings(): ParsedGlobalSettings {
     primaryNavigation: [
       { label: 'Field Notes', url: '/notes', openInNewTab: false, isExternal: false },
       { label: 'My Tools', url: '/tools', openInNewTab: false, isExternal: false },
-      { label: 'About', url: '#about', openInNewTab: false, isExternal: false },
     ],
-    footerNavigation: [],
     socialLinks: [
       { platform: 'X', url: 'https://x.com/fieldnotes-ai', handle: '@fieldnotes_ai' },
       { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/nikakarl' },
@@ -160,7 +175,7 @@ export async function getAllFieldNotes(): Promise<ParsedFieldNote[]> {
   }
 
   try {
-    const response = await client.getEntries<IFieldNoteFields>({
+    const response = await getClient().getEntries<IFieldNoteSkeleton>({
       content_type: 'fieldNote',
       order: ['-fields.publishedDate'],
       include: 2,
@@ -173,34 +188,22 @@ export async function getAllFieldNotes(): Promise<ParsedFieldNote[]> {
   }
 }
 
-// Fetch featured field note
+// Fetch featured field note (most recent by publishedDate)
 export async function getFeaturedFieldNote(): Promise<ParsedFieldNote | null> {
   if (!isContentfulConfigured()) {
     const notes = getDefaultFieldNotes()
-    return notes.find((n) => n.featured) || notes[0] || null
+    return notes[0] || null
   }
 
   try {
-    const response = await client.getEntries<IFieldNoteFields>({
-      content_type: 'fieldNote',
-      'fields.featured': true,
-      limit: 1,
-      include: 2,
-    })
-
-    if (response.items.length > 0) {
-      return parseFieldNote(response.items[0])
-    }
-
-    // Fallback to most recent
-    const fallback = await client.getEntries<IFieldNoteFields>({
+    const response = await getClient().getEntries<IFieldNoteSkeleton>({
       content_type: 'fieldNote',
       order: ['-fields.publishedDate'],
       limit: 1,
       include: 2,
     })
 
-    return fallback.items.length > 0 ? parseFieldNote(fallback.items[0]) : null
+    return response.items.length > 0 ? parseFieldNote(response.items[0]) : null
   } catch (error) {
     console.error('Error fetching featured note:', error)
     return null
@@ -215,7 +218,7 @@ export async function getFieldNoteBySlug(slug: string): Promise<ParsedFieldNote 
   }
 
   try {
-    const response = await client.getEntries<IFieldNoteFields>({
+    const response = await getClient().getEntries<IFieldNoteSkeleton>({
       content_type: 'fieldNote',
       'fields.slug': slug,
       limit: 1,
@@ -236,7 +239,7 @@ export async function getAllTools(): Promise<ParsedTool[]> {
   }
 
   try {
-    const response = await client.getEntries<IToolFields>({
+    const response = await getClient().getEntries<IToolSkeleton>({
       content_type: 'tool',
       order: ['fields.sortOrder'],
     })
@@ -255,7 +258,7 @@ export async function getActiveTools(): Promise<ParsedTool[]> {
   }
 
   try {
-    const response = await client.getEntries<IToolFields>({
+    const response = await getClient().getEntries<IToolSkeleton>({
       content_type: 'tool',
       'fields.status': 'Active',
       order: ['fields.sortOrder'],
@@ -282,15 +285,15 @@ function getDefaultFieldNotes(): ParsedFieldNote[] {
       relatedTools: [],
       featured: true,
       body: {
-        nodeType: 'document',
+        nodeType: BLOCKS.DOCUMENT,
         data: {},
         content: [
           {
-            nodeType: 'paragraph',
+            nodeType: BLOCKS.PARAGRAPH,
             data: {},
             content: [
               {
-                nodeType: 'text',
+                nodeType: 'text' as const,
                 value: 'The landscape of content management is shifting beneath our feet. What was once a straightforward process of creating, organizing, and publishing content has become something far more complex and interesting.',
                 marks: [],
                 data: {},
@@ -298,11 +301,11 @@ function getDefaultFieldNotes(): ParsedFieldNote[] {
             ],
           },
           {
-            nodeType: 'paragraph',
+            nodeType: BLOCKS.PARAGRAPH,
             data: {},
             content: [
               {
-                nodeType: 'text',
+                nodeType: 'text' as const,
                 value: 'This journal is my attempt to document that shift as it happens, from the perspective of someone deeply embedded in the infrastructure that makes content possible.',
                 marks: [],
                 data: {},
@@ -354,42 +357,47 @@ function getDefaultTools(): ParsedTool[] {
     {
       name: 'Contentful',
       slug: 'contentful',
-      description: 'Headless CMS for structured content',
+      description: 'Headless CMS for structured content. Content modeling is where I spend most of my time professionally.',
       category: 'CMS',
       vendor: 'Contentful',
       url: 'https://contentful.com',
       status: 'Active',
       sortOrder: 1,
+      simpleIconSlug: 'contentful',
     },
     {
-      name: 'Claude',
+      name: 'Claude API',
       slug: 'claude',
-      description: 'AI assistant for content analysis',
-      category: 'AI',
+      description: 'Primary AI model for everything on this site. Sonnet for most tasks, Opus for complex reasoning.',
+      category: 'AI Model',
       vendor: 'Anthropic',
       url: 'https://anthropic.com',
       status: 'Active',
       sortOrder: 2,
+      simpleIconSlug: 'anthropic',
+      notes: 'Currently testing claude-sonnet-4-6 for structured output generation in Next.js API routes.',
     },
     {
       name: 'Vercel',
       slug: 'vercel',
-      description: 'Deployment and hosting platform',
+      description: 'Deployment and hosting. Auto-deploys on push. Zero configuration needed for Next.js.',
       category: 'Infrastructure',
       vendor: 'Vercel',
       url: 'https://vercel.com',
       status: 'Active',
       sortOrder: 3,
+      simpleIconSlug: 'vercel',
     },
     {
-      name: 'GraphQL Explorer',
-      slug: 'graphql-explorer',
-      description: 'Testing content queries and mutations',
-      category: 'Development',
-      vendor: 'Various',
-      url: '#',
+      name: 'Next.js',
+      slug: 'nextjs',
+      description: 'App Router + React Server Components. The foundation this site is built on.',
+      category: 'Dev Tool',
+      vendor: 'Vercel',
+      url: 'https://nextjs.org',
       status: 'Testing',
       sortOrder: 4,
+      simpleIconSlug: 'nextdotjs',
     },
   ]
 }
@@ -401,7 +409,7 @@ export async function getAllFieldNoteSlugs(): Promise<string[]> {
   }
 
   try {
-    const response = await client.getEntries<IFieldNoteFields>({
+    const response = await getClient().getEntries<IFieldNoteSkeleton>({
       content_type: 'fieldNote',
       select: ['fields.slug'],
     })

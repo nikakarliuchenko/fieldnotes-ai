@@ -2,8 +2,7 @@ import { Metadata } from 'next'
 import { getGlobalSettings, getAllTools } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import ToolCard from '@/components/ToolCard'
-import SectionLabel from '@/components/SectionLabel'
+import ToolsContent from '@/components/ToolsContent'
 
 export const revalidate = 60
 
@@ -11,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getGlobalSettings()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fieldnotes-ai.com'
   const title = `My Tools | ${settings?.siteName || 'FieldNotes AI'}`
-  const description = 'Tools and technologies used in exploring the intersection of content infrastructure and AI.'
+  const description = 'The AI and developer tools I actually use — updated as the stack evolves.'
 
   return {
     title,
@@ -34,33 +33,28 @@ export default async function ToolsPage() {
     getAllTools(),
   ])
 
-  // Sort tools by sortOrder
   const sortedTools = [...tools].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
-    <main className="container">
+    <>
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      <section className="tools-page animate-fade-in-up">
-        <SectionLabel>All Tools</SectionLabel>
-        
-        {sortedTools.length > 0 ? (
-          <div className="tools-grid">
-            {sortedTools.map((tool) => (
-              <div key={tool.slug} className="tool-cell">
-                <ToolCard tool={tool} showStatus />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>No tools documented yet — check back soon.</p>
-          </div>
-        )}
-      </section>
+      <main className="col">
+        <header className="page-header">
+          <div className="page-eyebrow">My Stack</div>
+          <h1 className="page-title">
+            The tools I actually use.<span> Updated as the stack evolves.</span>
+          </h1>
+          <p className="page-desc">
+            Every tool on this page is something I use in the field. Some are daily drivers.
+            Some I&apos;m still figuring out. The pulsing dot marks what I&apos;m currently working with most.
+          </p>
+        </header>
+
+        <ToolsContent tools={sortedTools} />
+      </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-
-    </main>
+    </>
   )
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Playfair_Display, Lora, IBM_Plex_Mono } from 'next/font/google'
+import { Playfair_Display, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -9,9 +9,10 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-const lora = Lora({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
-  variable: '--font-lora',
+  weight: ['300', '400', '500'],
+  variable: '--font-ibm-plex-sans',
   display: 'swap',
 })
 
@@ -57,8 +58,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${lora.variable} ${ibmPlexMono.variable}`}>
-      <body>
+    <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
+      <body className="page-wrap">
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}` }} />
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         {children}
         <Analytics />
       </body>

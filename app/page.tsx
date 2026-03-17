@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
 import { getGlobalSettings, getFeaturedFieldNote, getAllFieldNotes, getActiveTools } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import FieldNoteCard from '@/components/FieldNoteCard'
-import ToolCard from '@/components/ToolCard'
-import AboutStrip from '@/components/AboutStrip'
-import SectionLabel from '@/components/SectionLabel'
+import FeaturedNote from '@/components/FeaturedNote'
+import NoteListItem from '@/components/NoteListItem'
 
 export const revalidate = 60
 
@@ -50,62 +50,94 @@ export default async function HomePage() {
     getActiveTools(),
   ])
 
-  // Filter out the featured note from the list
-  const otherNotes = allNotes.filter(
-    (note) => note.slug !== featuredNote?.slug
-  )
+  const otherNotes = allNotes
+    .filter((note) => note.slug !== featuredNote?.slug)
+    .slice(0, 5)
 
   return (
-    <main className="container">
+    <>
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
-      {/* Featured Article */}
-      {featuredNote && (
-        <section className="animate-fade-in-up">
-          <FieldNoteCard note={featuredNote} variant="featured" />
-        </section>
-      )}
-
-      {/* Notes List */}
-      {otherNotes.length > 0 && (
-        <section className="notes-section animate-fade-in-up animation-delay-100">
-          <SectionLabel>Recent Field Notes</SectionLabel>
-          <div className="notes-list">
-            {otherNotes.map((note) => (
-              <FieldNoteCard key={note.slug} note={note} variant="list" />
-            ))}
+      <header className="site-header">
+        <div className="sh-eyebrow">VOL. I &nbsp;&middot;&nbsp; BOSTON, MA &nbsp;&middot;&nbsp; 2026</div>
+        <div className="sh-top">
+          <h1 className="sh-wordmark">FieldNotes<span>AI</span></h1>
+          <div className="sh-photo" aria-label="Nika Karliuchenko">
+            <Image
+              src="/nika.jpg"
+              alt="Nika Karliuchenko"
+              width={76}
+              height={76}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              priority
+            />
           </div>
-        </section>
-      )}
+        </div>
+        <p className="sh-sub">What happens when content infrastructure meets AI</p>
+        <address className="sh-byline">
+          By <a rel="author" href="/">Nika Karliuchenko</a>
+        </address>
+      </header>
 
-      {/* Empty State */}
-      {!featuredNote && otherNotes.length === 0 && (
-        <section className="empty-state animate-fade-in-up">
-          <p>No notes yet — check back soon.</p>
-        </section>
-      )}
+      <main id="main-content" className="col">
+        {featuredNote && (
+          <section aria-label="Featured note">
+            <FeaturedNote note={featuredNote} />
+          </section>
+        )}
 
-      {/* Tools Grid */}
-      {tools.length > 0 && (
-        <section className="tools-section animate-fade-in-up animation-delay-200">
-          <SectionLabel>My Tools</SectionLabel>
-          <div className="tools-grid">
-            {tools.map((tool) => (
-              <div key={tool.slug} className="tool-cell">
-                <ToolCard tool={tool} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+        {otherNotes.length > 0 && (
+          <section className="notes-section" aria-label="Recent notes">
+            <div className="sec-hd">
+              <span>Recent Field Notes</span>
+              <a href="/notes" className="sec-view-all">View all →</a>
+            </div>
+            <div className="notes-list">
+              {otherNotes.map((note) => (
+                <NoteListItem key={note.slug} note={note} />
+              ))}
+            </div>
+          </section>
+        )}
 
-      {/* About Strip */}
-      <div className="animate-fade-in-up animation-delay-300">
-        <AboutStrip />
-      </div>
+        {!featuredNote && otherNotes.length === 0 && (
+          <section className="empty-state">
+            <p>No notes yet — check back soon.</p>
+          </section>
+        )}
+
+        {tools.length > 0 && (
+          <section className="tools-section" aria-label="Tools">
+            <div className="sec-hd">
+              <span>My Tools</span>
+              <Link href="/tools">View all →</Link>
+            </div>
+            <div className="tools-strip">
+              {tools.map((tool) => (
+                <a
+                  key={tool.slug}
+                  href={tool.url || '#'}
+                  target={tool.url ? '_blank' : undefined}
+                  rel={tool.url ? 'noopener noreferrer' : undefined}
+                  className={`tool-home${tool.status === 'Active' ? ' now' : ''}`}
+                >
+                  <div className="tool-home-name">{tool.name}</div>
+                  {tool.description && <div className="tool-home-desc">{tool.description}</div>}
+                  {tool.category && <span className="tool-home-tag">{tool.category}</span>}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <div className="bio">
+          <strong>Nika Karliuchenko</strong> is a content infrastructure specialist exploring the
+          intersection of structured content and artificial intelligence. Based in Boston, she
+          documents her experiments and observations in this field journal.
+        </div>
+      </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />
-
-    </main>
+    </>
   )
 }

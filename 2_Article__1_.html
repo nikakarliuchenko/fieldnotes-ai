@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ── SEO: Title ── -->
+<title>My Contentful Token Ended Up in Git — FieldNotes AI</title>
+<meta name="description" content="GitGuardian caught what Claude Code didn't. How an MCP config file silently committed my Contentful Management Token to git history, and how I fixed it.">
+<meta name="author" content="Nika Karliuchenko">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://fieldnotes-ai.com/notes/mcp-token-in-git-history">
+
+<!-- ── Open Graph ── -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude Code silently committed my token to git history — FieldNotes AI">
+<meta property="og:description" content="GitGuardian caught what Claude Code didn't. Here's exactly how an MCP config file leaked a Contentful Management Token and what I do differently now.">
+<meta property="og:url" content="https://fieldnotes-ai.com/notes/mcp-token-in-git-history">
+<meta property="og:site_name" content="FieldNotes AI">
+<meta property="og:image" content="https://fieldnotes-ai.com/og-default.png">
+<meta property="article:published_time" content="2026-03-07T09:00:00-05:00">
+<meta property="article:modified_time" content="2026-03-07T09:00:00-05:00">
+<meta property="article:author" content="https://fieldnotes-ai.com/#nika">
+<meta property="article:section" content="Building">
+
+<!-- ── Twitter/X Card ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code silently committed my token to git history — FieldNotes AI">
+<meta name="twitter:description" content="GitGuardian caught what Claude Code didn't. Here's how an MCP config file leaked a credential and what I do differently now.">
+<meta name="twitter:creator" content="@nikakarliuchenko">
+<meta name="twitter:image" content="https://fieldnotes-ai.com/og-default.png">
+
+<!-- ── Structured Data: Article + BreadcrumbList ── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": "https://www.fieldnotes-ai.com/notes/mcp-token-in-git-history#article",
+      "headline": "Claude Code silently committed my Contentful Management Token to git history through an MCP config file.",
+      "description": "GitGuardian caught what Claude Code didn't. Here's exactly how an MCP config file caused it and what I do differently now.",
+      "datePublished": "2026-03-07T09:00:00-05:00",
+      "dateModified": "2026-03-07T09:00:00-05:00",
+      "author": {
+        "@type": "Person",
+        "@id": "https://fieldnotes-ai.com/#nika",
+        "name": "Nika Karliuchenko",
+        "url": "https://www.fieldnotes-ai.com",
+        "sameAs": [
+          "https://linkedin.com/in/nikakarliuchenko",
+          "https://github.com/nikakarliuchenko"
+        ]
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "FieldNotes AI",
+        "url": "https://fieldnotes-ai.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://fieldnotes-ai.com/og-default.png"
+        }
+      },
+      "image": "https://fieldnotes-ai.com/og-default.png",
+      "mainEntityOfPage": "https://fieldnotes-ai.com/notes/mcp-token-in-git-history",
+      "url": "https://fieldnotes-ai.com/notes/mcp-token-in-git-history",
+      "articleSection": "Building",
+      "keywords": [
+        "Claude Code",
+        "MCP",
+        "Contentful",
+        "git security",
+        "credential leak",
+        "GitGuardian"
+      ],
+      "wordCount": 950,
+      "isPartOf": {
+        "@type": "Blog",
+        "name": "FieldNotes AI",
+        "url": "https://fieldnotes-ai.com"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Field Notes",
+          "item": "https://fieldnotes-ai.com/notes"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "#006 \u2014 MCP token in git history",
+          "item": "https://fieldnotes-ai.com/notes/mcp-token-in-git-history"
+        }
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.fieldnotes-ai.com/#website",
+      "url": "https://www.fieldnotes-ai.com",
+      "name": "FieldNotes AI",
+      "description": "A practitioner journal documenting real-time AI-assisted development workflows.",
+      "publisher": {
+        "@type": "Person",
+        "@id": "https://www.fieldnotes-ai.com/#nika",
+        "name": "Nika Karliuchenko"
+      }
+    }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+
+/* ── DESIGN TOKENS ── */
+:root {
+  --bg:          #FAF9F6;
+  --bg-subtle:   #F3F1EC;
+  --bg-card:     #FFFFFF;
+  --border:      #E2DDD6;
+  --border-f:    #EDE9E2;
+  --ink:         #1C1917;
+  --ink-2:       #57534E;
+  --ink-3:       #A8A29E;
+  --accent:      #BE2A2A;
+  --acc-pale:    #FDF2F2;
+  --acc-mid:     #F0CACA;
+
+  --dark-bg:     #1C1917;
+  --dark-surf:   #242120;
+  --dark-border: #3D3836;
+  --dark-ink:    #FAFAF9;
+  --dark-ink2:   #A8A29E;
+  --dark-ink3:   #78716C;
+  --dark-acc:    #D44040;
+
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans:  'IBM Plex Sans', system-ui, sans-serif;
+  --mono:  'IBM Plex Mono', monospace;
+
+  --col: 680px;       /* nav / header stays wide */
+  --art: 640px;       /* article prose: ~65–70 chars/line at 16px IBM Plex Sans */
+  --r: 3px;
+}
+
+/* skip-to-content */
+.skip-link {
+  position: absolute; top: -40px; left: 8px; z-index: 999;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--mono); font-size: 11px; padding: 6px 12px;
+  border-radius: 3px; transition: top .15s;
+}
+.skip-link:focus { top: 8px; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: pointer; font: inherit; }
+body { background: #0d0d0d; font-family: var(--mono); }
+
+/* ── SHELL ── */
+.shell { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 34px; background: #080808; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 14px; gap: 2px; }
+.s-title { color: var(--accent); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 16px; }
+.s-tab { height: 34px; padding: 0 14px; font-size: 10px; color: #444; letter-spacing: 0.04em; border-bottom: 2px solid transparent; transition: all 0.15s; cursor: pointer; display: flex; align-items: center; }
+.s-tab:hover { color: #888; }
+.s-tab.on { color: #ddd; border-bottom-color: var(--accent); }
+.s-note { margin-left: auto; font-size: 10px; color: #2a2a2a; }
+.pages { padding-top: 34px; }
+.page { display: none; }
+.page.on { display: block; }
+
+/* ── BROWSER ── */
+.browser { max-width: 1200px; margin: 14px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px #1e1e1e, 0 20px 60px rgba(0,0,0,.7); }
+.b-bar { height: 38px; background: #161616; border-bottom: 1px solid #222; display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+.dots { display: flex; gap: 6px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot.r{background:#FF5F57;}.dot.y{background:#FEBC2E;}.dot.g{background:#28C840;}
+.url { flex:1; max-width:380px; margin:0 auto; background:#0e0e0e; border:1px solid #2a2a2a; border-radius:5px; padding:4px 10px; font-size:11px; color:#555; text-align:center; display:flex; align-items:center; justify-content:center; gap:5px; }
+.url-lock { font-size:9px; color:#3a8a3a; }
+
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);} }
+
+/* ════════════════════════════════
+   LIGHT SITE
+════════════════════════════════ */
+.site { background: var(--bg); color: var(--ink); }
+
+/* progress bar */
+.prog { height: 2px; background: var(--border); position: sticky; top: 0; z-index: 90; }
+.prog-fill { height: 100%; background: var(--accent); width: 42%; }
+
+/* ── NAV ── */
+.nav { position: sticky; top: 2px; z-index: 89; height: 52px; background: rgba(250,249,246,.93); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border-f); display: flex; align-items: center; padding: 0 clamp(16px,4vw,48px); }
+.nav-logo { font-family: var(--serif); font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); display: flex; align-items: center; }
+.nav-logo span { color: var(--accent); font-style: italic; }
+.nav-links { display: flex; align-items: center; list-style: none; margin-right: auto; margin-left: 40px; }
+.nav-links a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); padding: 0 14px; height: 52px; display: flex; align-items: center; transition: color 0.15s; }
+.nav-links a:hover { color: var(--ink); }
+.nav-links a.on { color: var(--ink); border-bottom: 2px solid var(--accent); }
+.nav-r { display: flex; align-items: center; gap: 6px; }
+.nav-sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; }
+.nav-ico { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--ink-3); transition: all .15s; }
+.nav-ico:hover { color: var(--ink); background: var(--bg-subtle); }
+.nav-srch { font-family: var(--mono); font-size: 10px; color: var(--ink-3); border: 1px solid var(--border); background: var(--bg-card); border-radius: 5px; padding: 4px 10px; display: flex; align-items: center; gap: 5px; transition: all .15s; cursor: pointer; }
+.nav-srch kbd { font-size: 9px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 3px; padding: 1px 4px; }
+.nav-theme { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--ink-3); }
+
+/* ── ARTICLE LAYOUT ── */
+.col { max-width: var(--art); margin: 0 auto; padding: 0 clamp(16px,4vw,48px); }
+
+/* Breadcrumb */
+.breadcrumb { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--ink-3); padding: 20px 0 0; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.breadcrumb a { color: var(--ink-3); transition: color .15s; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb span { color: var(--ink-3); }
+
+/* Article header */
+.art-header { padding: 28px 0 32px; border-bottom: 1px solid var(--border-f); }
+.art-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.art-num { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .06em; }
+.art-date { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: auto; }
+.art-cost { font-family: var(--mono); font-size: 10px; color: var(--ink-3); background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--r); padding: 2px 8px; }
+.lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: var(--r); white-space: nowrap; }
+.lbl.observing { color: #A06C1A; background: #FDF6EC; border: 1px solid #F0D9B0; }
+.lbl.building  { color: var(--accent); background: var(--acc-pale); border: 1px solid var(--acc-mid); }
+.lbl.testing   { color: #3A5FA0; background: #EEF3FB; border: 1px solid #C5D9F0; }
+.lbl.learning  { color: #2A7A6A; background: #EEF7F5; border: 1px solid #B0DEDA; }
+
+.art-title { font-family: var(--serif); font-size: clamp(26px,4vw,38px); font-weight: 700; line-height: 1.08; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 18px; }
+.art-lede { font-family: var(--serif); font-size: 18px; font-style: italic; line-height: 1.65; color: var(--ink-2); border-left: 3px solid var(--accent); padding-left: 18px; margin-bottom: 20px; }
+.art-byline { font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: .04em; display: flex; align-items: center; gap: 12px; }
+.art-byline a { color: var(--accent); }
+.art-byline-sep { color: var(--border); }
+
+/* ── ARTICLE BODY ── */
+.art-body { padding: 36px 0; }
+
+/* All prose text */
+.art-body p {
+  font-family: var(--sans); font-size: 16px; line-height: 1.8;
+  color: var(--ink-2); font-weight: 300;
+  margin-bottom: 24px;
+}
+.art-body p a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.art-body p a:hover { text-decoration-thickness: 2px; }
+.art-body p strong { color: var(--ink); font-weight: 500; }
+
+/* Section headings within article */
+.art-body h2 {
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.015em; line-height: 1.2;
+  margin: 40px 0 14px;
+}
+.art-body h3 {
+  font-family: var(--serif); font-size: 17px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.01em;
+  margin: 28px 0 10px;
+}
+
+/* Blockquote */
+.art-body blockquote {
+  border-left: 3px solid var(--border);
+  padding: 4px 0 4px 20px;
+  margin: 28px 0;
+}
+.art-body blockquote p {
+  font-family: var(--serif); font-size: 17px; font-style: italic;
+  color: var(--ink-2); line-height: 1.65; margin-bottom: 8px;
+}
+.art-body blockquote cite {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  letter-spacing: .04em; font-style: normal;
+}
+
+/* Pull quote — larger, crimson accent */
+.art-body .pull-quote {
+  border-left: 3px solid var(--accent);
+  padding: 8px 0 8px 20px;
+  margin: 36px 0;
+}
+.art-body .pull-quote p {
+  font-family: var(--serif); font-size: 20px; font-style: italic;
+  color: var(--ink); line-height: 1.5; font-weight: 500; margin-bottom: 0;
+}
+
+/* Ordered + unordered lists */
+.art-body ul, .art-body ol {
+  margin: 0 0 22px 0;
+  padding-left: 22px;
+}
+.art-body li {
+  font-family: var(--sans); font-size: 16px; line-height: 1.75;
+  color: var(--ink-2); font-weight: 300;
+  margin-bottom: 8px;
+}
+.art-body li strong { color: var(--ink); font-weight: 500; }
+.art-body ul li { list-style-type: none; position: relative; }
+.art-body ul li::before { content: '—'; position: absolute; left: -20px; color: var(--ink-3); font-size: 12px; top: 4px; }
+.art-body ol { list-style-type: decimal; }
+.art-body ol li::marker { color: var(--accent); font-family: var(--mono); font-size: 12px; }
+
+/* Inline code */
+.art-body code {
+  font-family: var(--mono); font-size: 13px;
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 3px; padding: 1px 6px;
+  color: var(--accent);
+}
+
+/* Code block */
+.art-body pre {
+  background: #1A1614;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 28px 0;
+  overflow: hidden;
+}
+.code-header {
+  background: #222;
+  padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #333;
+}
+.code-lang { font-family: var(--mono); font-size: 10px; color: #666; letter-spacing: .08em; text-transform: uppercase; }
+.code-copy { font-family: var(--mono); font-size: 10px; color: #555; letter-spacing: .04em; cursor: pointer; transition: color .15s; }
+.code-copy:hover { color: #999; }
+.art-body pre code {
+  display: block; padding: 20px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.7;
+  color: #C8B8A2; background: none; border: none;
+  white-space: pre; overflow-x: auto;
+}
+.token-key { color: #D44040; }
+.token-str { color: #9EC4A4; }
+.token-cmt { color: #555; font-style: italic; }
+.token-kw  { color: #9BAFD0; }
+.token-fn  { color: #D4A843; }
+.token-num { color: #B5A0D4; }
+
+/* Image block */
+.art-img { margin: 32px 0; }
+.art-img-inner {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.art-img-placeholder {
+  height: 280px;
+  background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--border) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px;
+}
+.art-img-icon { font-size: 28px; opacity: .4; }
+.art-img-label { font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: .08em; text-transform: uppercase; }
+.art-img figcaption {
+  padding: 10px 16px;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  letter-spacing: .03em; border-top: 1px solid var(--border);
+}
+
+/* Video embed */
+.art-video { margin: 32px 0; }
+.art-video-inner {
+  background: #1A1614; border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+}
+.art-video-placeholder {
+  height: 240px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+}
+.play-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  opacity: .85;
+}
+.play-btn::after { content: '▶'; color: white; font-size: 16px; margin-left: 3px; }
+.art-video figcaption { padding: 10px 16px; font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: .03em; border-top: 1px solid var(--border); background: var(--bg-subtle); }
+
+/* Callout / info box */
+.callout {
+  background: var(--acc-pale); border: 1px solid var(--acc-mid);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r); padding: 16px 18px;
+  margin: 28px 0;
+}
+.callout-label { font-family: var(--mono); font-size: 9px; color: var(--accent); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.callout p { font-family: var(--sans); font-size: 14px; color: var(--ink); font-weight: 400; line-height: 1.6; margin-bottom: 0; }
+
+/* Divider */
+.art-divider { border: none; border-top: 1px solid var(--border-f); margin: 36px 0; }
+
+/* Cost/session stats strip */
+.stats-strip {
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 6px; padding: 16px 20px;
+  display: flex; gap: 0; margin: 32px 0;
+}
+.stat {
+  display: flex; flex-direction: column; gap: 5px;
+  flex: 1;
+  padding-right: 20px;
+  border-right: 1px solid var(--border-f);
+  margin-right: 20px;
+}
+.stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.stat-val {
+  font-family: var(--mono); font-size: 15px; font-weight: 500;
+  color: var(--ink); letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.stat-lbl { font-family: var(--mono); font-size: 9px; color: var(--ink-3); letter-spacing: .08em; text-transform: uppercase; }
+
+/* Article footer nav */
+.art-nav {
+  padding: 32px 0;
+  border-top: 1px solid var(--border-f);
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+}
+.art-nav-item { max-width: 280px; }
+.art-nav-dir { font-family: var(--mono); font-size: 9px; color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.art-nav-title { font-family: var(--sans); font-size: 13px; color: var(--ink); line-height: 1.4; font-weight: 500; }
+.art-nav-title:hover { color: var(--accent); }
+.art-nav-item.next { text-align: right; }
+
+/* ── FOOTER ── */
+.footer { background: var(--ink); padding: 16px clamp(16px,4vw,48px); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.f-logo { font-family: var(--serif); font-size: 14px; font-style: italic; color: rgba(250,249,246,.6); }
+.f-links { display: flex; gap: 16px; align-items: center; }
+.f-links a { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: #555; transition: color .15s; display: inline-flex; align-items: center; }
+.f-links a:hover { color: rgba(250,249,246,.7); }
+.f-copy { font-family: var(--mono); font-size: 10px; color: #444; }
+
+/* ════════════════════════════════
+   DARK SITE
+════════════════════════════════ */
+.dark-site { background: var(--dark-bg); color: var(--dark-ink); position: relative; }
+.dark-site::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 900px; height: 500px; background: radial-gradient(ellipse at 50% 0%, rgba(190,42,42,.07) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+.dark-prog { height: 2px; background: var(--dark-border); position: sticky; top: 0; z-index: 90; }
+.dark-prog-fill { height: 100%; background: var(--dark-acc); width: 42%; }
+
+.dark-nav { position: sticky; top: 2px; z-index: 89; height: 52px; background: rgba(28,25,23,.93); backdrop-filter: blur(14px); border-bottom: 1px solid var(--dark-border); display: flex; align-items: center; padding: 0 clamp(16px,4vw,48px); }
+.dark-logo { font-family: var(--serif); font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: var(--dark-ink); display: flex; align-items: center; }
+.dark-logo span { color: var(--dark-acc); font-style: italic; }
+.dark-navlinks { display: flex; align-items: center; list-style: none; margin-right: auto; margin-left: 40px; }
+.dark-navlinks a { font-family: var(--mono); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--dark-ink3); padding: 0 14px; height: 52px; display: flex; align-items: center; transition: color .15s; }
+.dark-navlinks a:hover { color: var(--dark-ink); }
+.dark-navlinks a.on { color: var(--dark-ink); border-bottom: 2px solid var(--dark-acc); }
+.dark-nr { display: flex; align-items: center; gap: 6px; }
+.dark-sep { width: 1px; height: 16px; background: var(--dark-border); margin: 0 2px; }
+.dark-ico { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--dark-ink3); transition: all .15s; }
+.dark-ico:hover { color: var(--dark-ink); background: var(--dark-surf); }
+.dark-srch { font-family: var(--mono); font-size: 10px; color: var(--dark-ink3); border: 1px solid var(--dark-border); background: transparent; border-radius: 5px; padding: 4px 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.dark-srch kbd { font-size: 9px; background: var(--dark-surf); border: 1px solid var(--dark-border); border-radius: 3px; padding: 1px 4px; color: var(--dark-ink3); }
+.dark-theme { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--dark-border); background: transparent; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--dark-ink3); }
+
+.dark-col { max-width: var(--col); margin: 0 auto; padding: 0 clamp(16px,4vw,48px); position: relative; z-index: 1; }
+
+/* Dark labels */
+.dlbl { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: var(--r); white-space: nowrap; }
+.dlbl.observing { color: #D4943A; background: #2A1E0A; border: 1px solid #4A3010; }
+.dlbl.building  { color: var(--dark-acc); background: #2A1010; border: 1px solid #5A2020; }
+.dlbl.testing   { color: #6A9ADE; background: #0A1828; border: 1px solid #1A3050; }
+.dlbl.learning  { color: #5ABE9A; background: #0A2018; border: 1px solid #1A4030; }
+
+/* dark breadcrumb */
+.dark-bc { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--dark-ink3); padding: 20px 0 0; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.dark-bc a { color: var(--dark-ink3); transition: color .15s; }
+.dark-bc a:hover { color: var(--dark-acc); }
+
+/* dark article header */
+.dark-art-header { padding: 28px 0 32px; border-bottom: 1px solid var(--dark-border); }
+.d-art-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.d-art-num { font-family: var(--mono); font-size: 11px; color: var(--dark-acc); letter-spacing: .06em; }
+.d-art-date { font-family: var(--mono); font-size: 11px; color: var(--dark-ink3); margin-left: auto; }
+.d-art-cost { font-family: var(--mono); font-size: 10px; color: var(--dark-ink3); background: var(--dark-surf); border: 1px solid var(--dark-border); border-radius: var(--r); padding: 2px 8px; }
+.d-art-title { font-family: var(--serif); font-size: clamp(26px,4vw,38px); font-weight: 700; line-height: 1.08; letter-spacing: -0.025em; color: var(--dark-ink); margin-bottom: 18px; }
+.d-art-lede { font-family: var(--serif); font-size: 18px; font-style: italic; line-height: 1.65; color: var(--dark-ink2); border-left: 3px solid var(--dark-acc); padding-left: 18px; margin-bottom: 20px; }
+.d-art-byline { font-family: var(--mono); font-size: 10px; color: var(--dark-ink3); letter-spacing: .04em; display: flex; align-items: center; gap: 12px; }
+.d-art-byline a { color: var(--dark-acc); }
+
+/* dark body prose — reuses same classes with dark overrides via .dark-site prefix */
+.dark-body { padding: 36px 0; }
+.dark-body p { font-family: var(--sans); font-size: 16px; line-height: 1.8; color: var(--dark-ink2); font-weight: 300; margin-bottom: 24px; }
+.dark-body p a { color: var(--dark-acc); text-decoration: underline; text-underline-offset: 3px; }
+.dark-body p strong { color: var(--dark-ink); font-weight: 500; }
+.dark-body h2 { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--dark-ink); letter-spacing: -0.015em; line-height: 1.2; margin: 40px 0 14px; }
+.dark-body h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--dark-ink); letter-spacing: -0.01em; margin: 28px 0 10px; }
+.dark-body blockquote { border-left: 3px solid var(--dark-border); padding: 4px 0 4px 20px; margin: 28px 0; }
+.dark-body blockquote p { font-family: var(--serif); font-size: 17px; font-style: italic; color: var(--dark-ink2); line-height: 1.65; margin-bottom: 8px; }
+.dark-body blockquote cite { font-family: var(--mono); font-size: 10px; color: var(--dark-ink3); letter-spacing: .04em; font-style: normal; }
+.dark-body .pull-quote { border-left: 3px solid var(--dark-acc); padding: 8px 0 8px 20px; margin: 36px 0; }
+.dark-body .pull-quote p { font-family: var(--serif); font-size: 20px; font-style: italic; color: var(--dark-ink); line-height: 1.5; font-weight: 500; margin-bottom: 0; }
+.dark-body ul, .dark-body ol { margin: 0 0 22px 0; padding-left: 22px; }
+.dark-body li { font-family: var(--sans); font-size: 16px; line-height: 1.75; color: var(--dark-ink2); font-weight: 300; margin-bottom: 8px; }
+.dark-body li strong { color: var(--dark-ink); font-weight: 500; }
+.dark-body ul li { list-style-type: none; position: relative; }
+.dark-body ul li::before { content: '—'; position: absolute; left: -20px; color: var(--dark-ink3); font-size: 12px; top: 4px; }
+.dark-body ol { list-style-type: decimal; }
+.dark-body ol li::marker { color: var(--dark-acc); font-family: var(--mono); font-size: 12px; }
+.dark-body code { font-family: var(--mono); font-size: 13px; background: var(--dark-surf); border: 1px solid var(--dark-border); border-radius: 3px; padding: 1px 6px; color: var(--dark-acc); }
+.dark-body pre { background: #131110; border: 1px solid var(--dark-border); border-radius: 6px; margin: 28px 0; overflow: hidden; }
+.dark-body pre code { display: block; padding: 20px; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: #C8B8A2; background: none; border: none; white-space: pre; overflow-x: auto; }
+.dark-body .callout { background: #2A1010; border: 1px solid #5A2020; border-left: 3px solid var(--dark-acc); border-radius: var(--r); padding: 16px 18px; margin: 28px 0; }
+.dark-body .callout-label { font-family: var(--mono); font-size: 9px; color: var(--dark-acc); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.dark-body .callout p { font-family: var(--sans); font-size: 14px; color: var(--dark-ink); font-weight: 400; line-height: 1.6; margin-bottom: 0; }
+.dark-body .art-divider { border-color: var(--dark-border); }
+.dark-body .stats-strip {
+  background: var(--dark-surf); border-color: var(--dark-border);
+}
+.dark-body .stat { border-right-color: var(--dark-border); }
+.dark-body .stat:last-child { border-right: none; }
+.dark-body .stat-val { color: var(--dark-ink); }
+.dark-body .stat-lbl { color: var(--dark-ink3); }
+.dark-body .art-img-inner { background: var(--dark-surf); border-color: var(--dark-border); }
+.dark-body .art-img-placeholder { background: linear-gradient(135deg, var(--dark-surf) 0%, var(--dark-border) 100%); }
+.dark-body .art-img-label { color: var(--dark-ink3); }
+.dark-body .art-img figcaption { color: var(--dark-ink3); border-color: var(--dark-border); background: var(--dark-surf); }
+.dark-body .art-video-inner { background: #0E0C0B; border-color: var(--dark-border); }
+.dark-body .art-video-placeholder { background: #0E0C0B; }
+.dark-body .art-video figcaption { color: var(--dark-ink3); border-color: var(--dark-border); background: var(--dark-surf); }
+.dark-body .art-nav { border-top-color: var(--dark-border); }
+.dark-body .art-nav-dir { color: var(--dark-ink3); }
+.dark-body .art-nav-title { color: var(--dark-ink); }
+.dark-body .art-nav-title:hover { color: var(--dark-acc); }
+
+/* dark footer */
+.dark-footer { background: #111; padding: 16px clamp(16px,4vw,48px); display: flex; align-items: center; justify-content: space-between; gap: 16px; position: relative; z-index: 1; border-top: 1px solid var(--dark-border); }
+.df-logo { font-family: var(--serif); font-size: 14px; font-style: italic; color: var(--dark-ink3); }
+.df-links { display: flex; gap: 16px; align-items: center; }
+.df-links a { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--dark-ink3); transition: color .15s; display: inline-flex; align-items: center; }
+.df-links a:hover { color: var(--dark-ink); }
+.df-copy { font-family: var(--mono); font-size: 10px; color: var(--dark-ink3); }
+
+</style>
+</head>
+<body>
+
+<nav class="shell">
+  <span class="s-title">fieldnotes-ai · field note</span>
+  <button class="s-tab on" onclick="show('light',this)">☀ Light</button>
+  <button class="s-tab" onclick="show('dark',this)">🌙 Dark</button>
+  <span class="s-note">v2 — 640px prose, 16px body, ccusage stats, Article JSON-LD</span>
+</nav>
+
+<div class="pages">
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<!-- ══════════ LIGHT ══════════ -->
+<div id="p-light" class="page on">
+<div class="browser">
+  <div class="b-bar">
+    <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+    <div class="url"><span class="url-lock">🔒</span> fieldnotes-ai.com/notes/mcp-token-in-git-history</div>
+  </div>
+  <div class="site">
+    <div class="prog"><div class="prog-fill"></div></div>
+
+    <nav class="nav">
+      <div class="nav-logo">FieldNotes<span>AI</span></div>
+      <ul class="nav-links">
+        <li><a href="#" class="on" aria-current="page">Field Notes</a></li>
+        <li><a href="#">My Tools</a></li>
+      </ul>
+      <div class="nav-r">
+        <button class="nav-srch">Search <kbd>⌘K</kbd></button>
+        <div class="nav-sep"></div>
+        <a href="#" class="nav-ico" title="X" aria-label="X" style="width:28px;height:28px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/></svg></a>
+        <a href="#" class="nav-ico" title="LinkedIn" aria-label="LinkedIn" style="width:28px;height:28px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/></svg></a>
+        <a href="#" class="nav-ico" title="GitHub" aria-label="GitHub" style="width:28px;height:28px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a>
+        <div class="nav-sep"></div>
+        <button class="nav-theme">☀</button>
+      </div>
+    </nav>
+
+    <main id="main-content">
+    <div class="col">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="#">Field Notes</a>
+        <span>›</span>
+        <span>#006</span>
+      </div>
+
+      <!-- Semantic article wrapper — feeds Google + AI crawlers -->
+      <article itemscope itemtype="https://schema.org/BlogPosting">
+        <meta itemprop="datePublished" content="2026-03-07T09:00:00-05:00">
+        <meta itemprop="dateModified" content="2026-03-07T09:00:00-05:00">
+        <meta itemprop="author" content="Nika Karliuchenko">
+        <meta itemprop="publisher" content="FieldNotes AI">
+
+      <!-- Article header -->
+      <header class="art-header">
+        <div class="art-meta">
+          <span class="art-num">#006</span>
+          <span class="lbl observing">Observing</span>
+          <span class="art-cost">Session cost: $3.14</span>
+          <time class="art-date" datetime="2026-03-07" itemprop="datePublished">Mar 7, 2026</time>
+        </div>
+        <h1 class="art-title" itemprop="headline">Claude Code silently committed my Contentful Management Token to git history through an MCP config file.</h1>
+        <p class="art-lede" itemprop="description">GitGuardian caught what Claude Code didn't. Here's exactly how an MCP config file caused it and what I do differently now.</p>
+        <div class="art-byline">
+          <span>By <a href="#" itemprop="url">Nika Karliuchenko</a></span>
+          <span class="art-byline-sep">·</span>
+          <span>6 min read</span>
+          <span class="art-byline-sep">·</span>
+          <span>March 7, 2026</span>
+        </div>
+      </header>
+
+      <!-- Article body -->
+      <div class="art-body" itemprop="articleBody">
+
+        <!-- Session stats — mirrors ccusage output: Cost · Total Tokens · Model -->
+        <div class="stats-strip">
+          <div class="stat">
+            <span class="stat-val">$3.14</span>
+            <span class="stat-lbl">Session cost</span>
+          </div>
+          <div class="stat">
+            <span class="stat-val">488K</span>
+            <span class="stat-lbl">Total tokens</span>
+          </div>
+          <div class="stat">
+            <span class="stat-val">opus-4-6</span>
+            <span class="stat-lbl">Model</span>
+          </div>
+
+        </div><!-- /stats-strip -->
+
+        <p>I was setting up the Contentful MCP server for the first time. Claude Code walked me through the configuration, and I followed along — pasting my Management Token into a config file as instructed. It worked. Claude Code connected to Contentful, listed my content types, built six of them in under ten minutes. I was impressed.</p>
+
+        <p>Two hours later, GitGuardian sent me an email. <strong>My Contentful Management Token was in my git history.</strong> Not in a .env file. Not in a file I'd added to .gitignore. In a <code>.claude/mcp.json</code> config file that Claude Code had created — and that I had committed without thinking.</p>
+
+        <div class="pull-quote">
+          <p>The thing that got me wasn't carelessness. It was trust. I trusted the tool to handle secrets the way I expected.</p>
+        </div>
+
+        <h2>How it happened</h2>
+
+        <p>The MCP setup process requires a config file that specifies which MCP servers to connect to, along with their authentication credentials. Here's roughly what mine looked like:</p>
+
+        <!-- Code block -->
+        <pre><div class="code-header"><span class="code-lang">JSON · .claude/mcp.json</span><span class="code-copy">Copy</span></div><code><span class="token-key">"mcpServers"</span><span>: {
+  </span><span class="token-key">"contentful"</span><span>: {
+    </span><span class="token-key">"command"</span><span>: </span><span class="token-str">"npx"</span><span>,
+    </span><span class="token-key">"args"</span><span>: [</span><span class="token-str">"-y"</span><span>, </span><span class="token-str">"@contentful/mcp-server"</span><span>],
+    </span><span class="token-key">"env"</span><span>: {
+      </span><span class="token-key">"CONTENTFUL_MANAGEMENT_TOKEN"</span><span>: </span><span class="token-str">"CFPAT-xxxxxxxxxxxxxxxxxxxx"</span><span class="token-cmt"> ← this went to git</span>
+    }
+  }
+}</span></code></pre>
+
+        <p>The file was in a project directory I was actively working in. I ran <code>git add .</code> and committed. Standard muscle memory. The MCP config file had no warning that it contained credentials. Nothing in the Claude Code workflow flagged it.</p>
+
+        <h2>What GitGuardian caught</h2>
+
+        <!-- Image placeholder -->
+        <figure class="art-img">
+          <div class="art-img-inner">
+            <div class="art-img-placeholder">
+              <span class="art-img-icon">🖼</span>
+              <span class="art-img-label">Screenshot · GitGuardian alert email</span>
+            </div>
+          </div>
+          <figcaption>The GitGuardian alert arrived about 2 hours after the commit. It correctly identified the Contentful Management Token type.</figcaption>
+        </figure>
+
+        <p>GitGuardian's free tier scans public repos in real-time. The email came fast. By the time I saw it, the commit was already pushed. The token was already compromised — even for a brief window on a low-traffic personal repo, a leaked Management Token gives full write access to your Contentful space.</p>
+
+        <blockquote>
+          <p>A Contentful Management Token has full read/write access to your space. It can create, update, and delete content types, entries, and assets. It is not a read-only key.</p>
+          <cite>— Contentful documentation</cite>
+        </blockquote>
+
+        <h2>What I did to fix it</h2>
+
+        <p>Here's the remediation sequence, in the order I ran it:</p>
+
+        <ol>
+          <li><strong>Revoke the token immediately</strong> in the Contentful web app under Settings → API keys → Content management tokens. Don't wait.</li>
+          <li><strong>Remove the credential from git history</strong> using <code>git filter-branch</code> or BFG Repo Cleaner. Force-push to main.</li>
+          <li><strong>Add the config file to .gitignore</strong> before creating a new token.</li>
+          <li><strong>Create a new Management Token</strong> and update the MCP config with the new value.</li>
+          <li><strong>Verify the old token is dead</strong> by attempting an API call with it.</li>
+        </ol>
+
+        <!-- Video placeholder -->
+        <figure class="art-video">
+          <div class="art-video-inner">
+            <div class="art-video-placeholder">
+              <div class="play-btn"></div>
+              <span style="font-family:var(--mono);font-size:10px;color:#666;letter-spacing:.06em;text-transform:uppercase;margin-top:4px;">Terminal walkthrough · 3 min</span>
+            </div>
+          </div>
+          <figcaption>Walking through the git history cleanup with BFG Repo Cleaner. The whole process took about 8 minutes.</figcaption>
+        </figure>
+
+        <h2>What to do differently from the start</h2>
+
+        <p>There are a few patterns that would have prevented this entirely:</p>
+
+        <ul>
+          <li><strong>Never put credentials in config files that live in project directories.</strong> Use environment variables referenced from the config, not values inline.</li>
+          <li><strong>Add MCP config directories to .gitignore immediately</strong> when you start a project — before you ever touch them.</li>
+          <li>Use a <strong>restricted token</strong> if your tool supports it. Contentful's Management API tokens are all-or-nothing, but some tools support scoped tokens.</li>
+          <li><strong>Run <code>git diff --staged</code></strong> before every commit. It takes 3 seconds. This is the oldest advice in the book and I still didn't do it.</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Worth knowing</div>
+          <p>The correct pattern for the Contentful MCP config is to reference an environment variable — <code>"CONTENTFUL_MANAGEMENT_TOKEN": "${CONTENTFUL_TOKEN}"</code> — not a literal value. The MCP server documentation doesn't make this obvious up front.</p>
+        </div>
+
+        <hr class="art-divider">
+
+        <h2>The bigger pattern</h2>
+
+        <p>This wasn't a one-off mistake. It's a pattern I keep seeing when AI tools generate configuration. The tool optimizes for "it works" — it puts the credential where it needs to be for the process to succeed. The concern of where that file ends up in version control is not part of the tool's evaluation function.</p>
+
+        <p>That's not a criticism. It's a constraint worth knowing. When you're working with AI tools that generate config files, credential handling is still your responsibility. The tool will not catch this for you. <a href="#">GitGuardian will</a> — but that's a backstop, not a strategy.</p>
+
+        <!-- Article nav -->
+        <div class="art-nav">
+          <div class="art-nav-item prev">
+            <div class="art-nav-dir">← Previous</div>
+            <a href="#" class="art-nav-title">My site was invisible to search engines. Here is every SEO fix I shipped in one session.</a>
+          </div>
+          <div class="art-nav-item next">
+            <div class="art-nav-dir">Next →</div>
+            <a href="#" class="art-nav-title">I spent a day researching SEO instead of shipping code. Here's why that was the right call.</a>
+          </div>
+        </div>
+
+      </div><!-- /art-body -->
+      </article><!-- /article -->
+    </div><!-- /col -->
+    </main>
+
+    <footer class="footer">
+      <span class="f-logo">FieldNotes<em>AI</em></span>
+      <div class="f-links">
+        <a href="#" title="X" aria-label="X"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/></svg></a>
+        <a href="#" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/></svg></a>
+        <a href="#" title="GitHub" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a>
+      </div>
+      <span class="f-copy">© 2026 Nika Karliuchenko</span>
+    </footer>
+  </div><!-- /site -->
+</div><!-- /browser -->
+</div><!-- /page light -->
+
+
+<!-- ══════════ DARK ══════════ -->
+<div id="p-dark" class="page">
+<div class="browser">
+  <div class="b-bar">
+    <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+    <div class="url"><span class="url-lock">🔒</span> fieldnotes-ai.com/notes/mcp-token-in-git-history</div>
+  </div>
+  <div class="dark-site">
+    <div class="dark-prog"><div class="dark-prog-fill"></div></div>
+
+    <nav class="dark-nav">
+      <div class="dark-logo">FieldNotes<span>AI</span></div>
+      <ul class="dark-navlinks">
+        <li><a href="#" class="on" aria-current="page">Field Notes</a></li>
+        <li><a href="#">My Tools</a></li>
+      </ul>
+      <div class="dark-nr">
+        <button class="dark-srch">Search <kbd>⌘K</kbd></button>
+        <div class="dark-sep"></div>
+        <a href="#" class="dark-ico" title="X" aria-label="X" style="width:28px;height:28px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/></svg></a>
+        <a href="#" class="dark-ico" title="LinkedIn" aria-label="LinkedIn" style="width:28px;height:28px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/></svg></a>
+        <a href="#" class="dark-ico" title="GitHub" aria-label="GitHub" style="width:28px;height:28px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a>
+        <div class="dark-sep"></div>
+        <button class="dark-theme">🌙</button>
+      </div>
+    </nav>
+
+    <main id="main-content-dark">
+    <div class="dark-col">
+      <div class="dark-bc">
+        <a href="#">Field Notes</a>
+        <span>›</span>
+        <span>#006</span>
+      </div>
+
+      <header class="dark-art-header">
+        <div class="d-art-meta">
+          <span class="d-art-num">#006</span>
+          <span class="dlbl observing">Observing</span>
+          <span class="d-art-cost">Session cost: $3.14</span>
+          <time class="d-art-date" datetime="2026-03-07">Mar 7, 2026</time>
+        </div>
+        <h1 class="d-art-title">Claude Code silently committed my Contentful Management Token to git history through an MCP config file.</h1>
+        <p class="d-art-lede">GitGuardian caught what Claude Code didn't. Here's exactly how an MCP config file caused it and what I do differently now.</p>
+        <div class="d-art-byline">
+          <span>By <a href="#">Nika Karliuchenko</a></span>
+          <span>·</span>
+          <span>6 min read</span>
+          <span>·</span>
+          <span>March 7, 2026</span>
+        </div>
+      </header>
+
+      <div class="dark-body">
+
+        <!-- Session stats — mirrors ccusage output: Cost · Total Tokens · Model -->
+        <div class="stats-strip">
+          <div class="stat">
+            <span class="stat-val">$3.14</span>
+            <span class="stat-lbl">Session cost</span>
+          </div>
+          <div class="stat">
+            <span class="stat-val">488K</span>
+            <span class="stat-lbl">Total tokens</span>
+          </div>
+          <div class="stat">
+            <span class="stat-val">opus-4-6</span>
+            <span class="stat-lbl">Model</span>
+          </div>
+
+        </div><!-- /stats-strip -->
+
+        <p>I was setting up the Contentful MCP server for the first time. Claude Code walked me through the configuration, and I followed along — pasting my Management Token into a config file as instructed. It worked. Claude Code connected to Contentful, listed my content types, built six of them in under ten minutes. I was impressed.</p>
+
+        <p>Two hours later, GitGuardian sent me an email. <strong>My Contentful Management Token was in my git history.</strong> Not in a .env file. Not in a file I'd added to .gitignore. In a <code>.claude/mcp.json</code> config file that Claude Code had created — and that I had committed without thinking.</p>
+
+        <div class="pull-quote">
+          <p>The thing that got me wasn't carelessness. It was trust. I trusted the tool to handle secrets the way I expected.</p>
+        </div>
+
+        <h2>How it happened</h2>
+
+        <p>The MCP setup process requires a config file that specifies which MCP servers to connect to, along with their authentication credentials. Here's roughly what mine looked like:</p>
+
+        <pre><div class="code-header"><span class="code-lang">JSON · .claude/mcp.json</span><span class="code-copy" style="color:#555;">Copy</span></div><code><span class="token-key">"mcpServers"</span><span style="color:#C8B8A2;">: {
+  </span><span class="token-key">"contentful"</span><span style="color:#C8B8A2;">: {
+    </span><span class="token-key">"command"</span><span style="color:#C8B8A2;">: </span><span class="token-str">"npx"</span><span style="color:#C8B8A2;">,
+    </span><span class="token-key">"args"</span><span style="color:#C8B8A2;">: [</span><span class="token-str">"-y"</span><span style="color:#C8B8A2;">, </span><span class="token-str">"@contentful/mcp-server"</span><span style="color:#C8B8A2;">],
+    </span><span class="token-key">"env"</span><span style="color:#C8B8A2;">: {
+      </span><span class="token-key">"CONTENTFUL_MANAGEMENT_TOKEN"</span><span style="color:#C8B8A2;">: </span><span class="token-str">"CFPAT-xxxxxxxxxxxxxxxxxxxx"</span><span class="token-cmt"> ← this went to git</span>
+    }
+  }
+}</span></code></pre>
+
+        <p>The file was in a project directory I was actively working in. I ran <code>git add .</code> and committed. Standard muscle memory. The MCP config file had no warning that it contained credentials. Nothing in the Claude Code workflow flagged it.</p>
+
+        <h2>What GitGuardian caught</h2>
+
+        <figure class="art-img">
+          <div class="art-img-inner">
+            <div class="art-img-placeholder">
+              <span class="art-img-icon" style="opacity:.25;">🖼</span>
+              <span class="art-img-label">Screenshot · GitGuardian alert email</span>
+            </div>
+          </div>
+          <figcaption>The GitGuardian alert arrived about 2 hours after the commit. It correctly identified the Contentful Management Token type.</figcaption>
+        </figure>
+
+        <p>GitGuardian's free tier scans public repos in real-time. The email came fast. By the time I saw it, the commit was already pushed. The token was already compromised — even for a brief window on a low-traffic personal repo, a leaked Management Token gives full write access to your Contentful space.</p>
+
+        <blockquote>
+          <p>A Contentful Management Token has full read/write access to your space. It can create, update, and delete content types, entries, and assets. It is not a read-only key.</p>
+          <cite>— Contentful documentation</cite>
+        </blockquote>
+
+        <h2>What I did to fix it</h2>
+
+        <p>Here's the remediation sequence, in the order I ran it:</p>
+
+        <ol>
+          <li><strong>Revoke the token immediately</strong> in the Contentful web app under Settings → API keys → Content management tokens. Don't wait.</li>
+          <li><strong>Remove the credential from git history</strong> using <code>git filter-branch</code> or BFG Repo Cleaner. Force-push to main.</li>
+          <li><strong>Add the config file to .gitignore</strong> before creating a new token.</li>
+          <li><strong>Create a new Management Token</strong> and update the MCP config with the new value.</li>
+          <li><strong>Verify the old token is dead</strong> by attempting an API call with it.</li>
+        </ol>
+
+        <figure class="art-video">
+          <div class="art-video-inner">
+            <div class="art-video-placeholder">
+              <div class="play-btn"></div>
+              <span style="font-family:var(--mono);font-size:10px;color:#555;letter-spacing:.06em;text-transform:uppercase;margin-top:4px;">Terminal walkthrough · 3 min</span>
+            </div>
+          </div>
+          <figcaption>Walking through the git history cleanup with BFG Repo Cleaner. The whole process took about 8 minutes.</figcaption>
+        </figure>
+
+        <h2>What to do differently from the start</h2>
+
+        <p>There are a few patterns that would have prevented this entirely:</p>
+
+        <ul>
+          <li><strong>Never put credentials in config files that live in project directories.</strong> Use environment variables referenced from the config, not values inline.</li>
+          <li><strong>Add MCP config directories to .gitignore immediately</strong> when you start a project — before you ever touch them.</li>
+          <li>Use a <strong>restricted token</strong> if your tool supports it. Contentful's Management API tokens are all-or-nothing, but some tools support scoped tokens.</li>
+          <li><strong>Run <code>git diff --staged</code></strong> before every commit. It takes 3 seconds.</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Worth knowing</div>
+          <p>The correct pattern for the Contentful MCP config is to reference an environment variable — <code>"CONTENTFUL_MANAGEMENT_TOKEN": "${CONTENTFUL_TOKEN}"</code> — not a literal value. The MCP server documentation doesn't make this obvious up front.</p>
+        </div>
+
+        <hr class="art-divider">
+
+        <h2>The bigger pattern</h2>
+
+        <p>This wasn't a one-off mistake. It's a pattern I keep seeing when AI tools generate configuration. The tool optimizes for "it works." The concern of where that file ends up in version control is not part of the tool's evaluation function.</p>
+
+        <p>That's not a criticism. It's a constraint worth knowing. When you're working with AI tools that generate config files, credential handling is still your responsibility. The tool will not catch this for you. <a href="#">GitGuardian will</a> — but that's a backstop, not a strategy.</p>
+
+        <div class="art-nav">
+          <div class="art-nav-item prev">
+            <div class="art-nav-dir">← Previous</div>
+            <a href="#" class="art-nav-title">My site was invisible to search engines. Here is every SEO fix I shipped in one session.</a>
+          </div>
+          <div class="art-nav-item next">
+            <div class="art-nav-dir">Next →</div>
+            <a href="#" class="art-nav-title">I spent a day researching SEO instead of shipping code. Here's why that was the right call.</a>
+          </div>
+        </div>
+
+      </div><!-- /dark-body -->
+    </div><!-- /dark-col -->
+    </main>
+
+    <footer class="dark-footer">
+      <span class="df-logo">FieldNotes<em>AI</em></span>
+      <div class="df-links">
+        <a href="#" title="X" aria-label="X"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/></svg></a>
+        <a href="#" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/></svg></a>
+        <a href="#" title="GitHub" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a>
+      </div>
+      <span class="df-copy">© 2026 Nika Karliuchenko</span>
+    </footer>
+  </div><!-- /dark-site -->
+</div><!-- /browser -->
+</div><!-- /page dark -->
+
+</div><!-- /pages -->
+
+<script>
+function show(n,b){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+n).classList.add('on');
+  if(b) b.classList.add('on');
+}
+</script>
+</body>
+</html>
