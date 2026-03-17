@@ -921,30 +921,23 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   z-index: 89;
   height: 52px;
+  background: rgba(250, 249, 246, 0.93);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-f);
+}
+
+.dark .nav {
+  background: rgba(28, 25, 23, 0.93);
+}
+
+.nav-inner {
   display: flex;
   align-items: center;
   max-width: var(--col);
   margin: 0 auto;
   padding: 0 clamp(16px, 4vw, 48px);
-  isolation: isolate;
-}
-
-.nav::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: rgba(250, 249, 246, 0.93);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border-f);
-  z-index: -1;
-}
-
-.dark .nav::before {
-  background: rgba(28, 25, 23, 0.93);
+  height: 100%;
+  width: 100%;
 }
 
 .nav-logo {
@@ -1036,7 +1029,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Footer --- */
 .footer {
-  position: relative;
+  background: var(--ink);
+}
+
+.dark .footer {
+  background: #111;
+  border-top: 1px solid var(--border);
+}
+
+.footer-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1044,24 +1045,6 @@ h1, h2, h3, h4, h5, h6 {
   max-width: var(--col);
   margin: 0 auto;
   padding: 16px clamp(16px, 4vw, 48px);
-  isolation: isolate;
-}
-
-.footer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: var(--ink);
-  z-index: -1;
-}
-
-.dark .footer::before {
-  background: #111;
-  border-top: 1px solid var(--border);
 }
 
 .f-logo {
@@ -1133,7 +1116,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 640px) {
-  .footer {
+  .footer-inner {
     flex-direction: column;
     gap: 12px;
     text-align: center;
@@ -1142,7 +1125,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Site Header (home page only) --- */
 .site-header {
-  padding: clamp(20px, 3vw, 36px) clamp(16px, 4vw, 48px) 0;
+  padding: 20px clamp(16px, 4vw, 48px) 0;
   max-width: var(--col);
   margin: 0 auto;
 }
@@ -1218,7 +1201,7 @@ h1.sh-wordmark span {
   letter-spacing: 0.06em;
   color: var(--ink-3);
   font-style: normal;
-  padding-bottom: clamp(16px, 2vw, 28px);
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--border-f);
 }
 
@@ -1232,7 +1215,7 @@ h1.sh-wordmark span {
 
 /* --- FieldNoteCard (featured) --- */
 .featured-note {
-  margin-bottom: 48px;
+  margin-bottom: 24px;
 }
 
 .featured-note-header {
@@ -1434,11 +1417,11 @@ h1.sh-wordmark span {
 
 /* --- Home page --- */
 .featured-note {
-  margin-top: 40px;
+  margin-top: 24px;
 }
 
 .notes-section {
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .notes-list {

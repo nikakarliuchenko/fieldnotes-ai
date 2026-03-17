@@ -31,26 +31,28 @@ interface FooterProps {
 export default function Footer({ copyright, socialLinks = [] }: FooterProps) {
   return (
     <footer className="footer">
-      <span className="f-logo">FieldNotes<em>AI</em></span>
-      <div className="f-links">
-        {socialLinks.map((link) => {
-          const icon = socialIcons[link.platform]
-          if (!icon) return null
-          return (
-            <a
-              key={link.platform}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={link.platform}
-              aria-label={link.platform}
-            >
-              {icon}
-            </a>
-          )
-        })}
+      <div className="footer-inner">
+        <span className="f-logo">FieldNotes<em>AI</em></span>
+        <div className="f-links">
+          {socialLinks.map((link) => {
+            const icon = socialIcons[link.platform]
+            if (!icon) return null
+            return (
+              <a
+                key={link.platform}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={link.platform}
+                aria-label={link.platform}
+              >
+                {icon}
+              </a>
+            )
+          })}
+        </div>
+        <span className="f-copy">&copy; {copyright || '2026 Nika Karliuchenko'}</span>
       </div>
-      <span className="f-copy">&copy; {copyright || '2026 Nika Karliuchenko'}</span>
     </footer>
   )
 }

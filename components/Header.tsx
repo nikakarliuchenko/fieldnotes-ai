@@ -34,38 +34,40 @@ interface HeaderProps {
 export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
   return (
     <nav className="nav">
-      <Link href="/" className="nav-logo">
-        FieldNotes<span>AI</span>
-      </Link>
-      <ul className="nav-links">
-        {navigation.map((item) => (
-          <li key={item.url}>
-            <NavLink href={item.url} openInNewTab={item.openInNewTab} isExternal={item.isExternal}>
-              {item.label}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
-      <div className="nav-r">
-        {socialLinks.map((link) => {
-          const icon = socialIcons[link.platform]
-          if (!icon) return null
-          return (
-            <a
-              key={link.platform}
-              href={link.url}
-              className="nav-ico"
-              target="_blank"
-              rel="noopener noreferrer"
-              title={link.platform}
-              aria-label={link.platform}
-            >
-              {icon}
-            </a>
-          )
-        })}
-        <div className="nav-sep" />
-        <ThemeToggle />
+      <div className="nav-inner">
+        <Link href="/" className="nav-logo">
+          FieldNotes<span>AI</span>
+        </Link>
+        <ul className="nav-links">
+          {navigation.map((item) => (
+            <li key={item.url}>
+              <NavLink href={item.url} openInNewTab={item.openInNewTab} isExternal={item.isExternal}>
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+        <div className="nav-r">
+          {socialLinks.map((link) => {
+            const icon = socialIcons[link.platform]
+            if (!icon) return null
+            return (
+              <a
+                key={link.platform}
+                href={link.url}
+                className="nav-ico"
+                target="_blank"
+                rel="noopener noreferrer"
+                title={link.platform}
+                aria-label={link.platform}
+              >
+                {icon}
+              </a>
+            )
+          })}
+          <div className="nav-sep" />
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   )
