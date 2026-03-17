@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { getGlobalSettings, getFeaturedFieldNote, getAllFieldNotes, getActiveTools } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FeaturedNote from '@/components/FeaturedNote'
 import NoteListItem from '@/components/NoteListItem'
-import ToolCard from '@/components/ToolCard'
 
 export const revalidate = 60
 
@@ -49,9 +49,9 @@ export default async function HomePage() {
     getActiveTools(),
   ])
 
-  const otherNotes = allNotes.filter(
-    (note) => note.slug !== featuredNote?.slug
-  )
+  const otherNotes = allNotes
+    .filter((note) => note.slug !== featuredNote?.slug)
+    .slice(0, 5)
 
   return (
     <>
@@ -95,14 +95,33 @@ export default async function HomePage() {
 
         {tools.length > 0 && (
           <section className="tools-section" aria-label="Tools">
-            <div className="sec-hd"><span>My Tools</span></div>
-            <div className="tools-grid">
+            <div className="sec-hd">
+              <span>My Tools</span>
+              <Link href="/tools">View all →</Link>
+            </div>
+            <div className="tools-strip">
               {tools.map((tool) => (
-                <ToolCard key={tool.slug} tool={tool} />
+                <a
+                  key={tool.slug}
+                  href={tool.url || '#'}
+                  target={tool.url ? '_blank' : undefined}
+                  rel={tool.url ? 'noopener noreferrer' : undefined}
+                  className={`tool-home${tool.status === 'Active' ? ' now' : ''}`}
+                >
+                  <div className="tool-home-name">{tool.name}</div>
+                  {tool.description && <div className="tool-home-desc">{tool.description}</div>}
+                  {tool.category && <span className="tool-home-tag">{tool.category}</span>}
+                </a>
               ))}
             </div>
           </section>
         )}
+
+        <div className="bio">
+          <strong>Nika Karliuchenko</strong> is a content infrastructure specialist exploring the
+          intersection of structured content and artificial intelligence. Based in Boston, she
+          documents her experiments and observations in this field journal.
+        </div>
       </main>
 
       <Footer copyright={settings?.copyright} socialLinks={settings?.socialLinks || []} />

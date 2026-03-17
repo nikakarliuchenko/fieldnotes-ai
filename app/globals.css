@@ -29,7 +29,7 @@
   --mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
 
   /* Layout */
-  --col: 680px;
+  --col: 900px;
   --art: 640px;
   --r: 3px;
 }
@@ -1356,6 +1356,8 @@ h1.sh-wordmark span {
 
 /* --- Section heading --- */
 .sec-hd { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: .02em; padding: 28px 0 14px; border-bottom: 1px solid var(--border-f); display: flex; align-items: center; justify-content: space-between; }
+.sec-hd a { font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: .06em; transition: color .15s; }
+.sec-hd a:hover { color: var(--accent); }
 .sec-count { font-family: var(--mono); font-size: 10px; color: var(--ink-3); background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 10px; padding: 1px 8px; }
 
 /* --- Tool cards (single-column list) --- */
@@ -1412,7 +1414,72 @@ h1.sh-wordmark span {
 }
 
 .tools-section {
-  margin-top: 48px;
+  margin-top: 8px;
+}
+
+/* Home page 3-column tool strip */
+.tools-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.tool-home {
+  background: var(--bg-card);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tool-home:hover { background: var(--bg-subtle); }
+
+.tool-home.now::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: tool-pulse 2.5s ease-in-out infinite;
+}
+
+.tool-home-name { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--ink); }
+.tool-home-desc { font-family: var(--sans); font-size: 11px; color: var(--ink-2); font-weight: 300; line-height: 1.4; }
+.tool-home-tag  { font-family: var(--mono); font-size: 9px; color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+
+@media (max-width: 700px) {
+  .tools-strip { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .tools-strip { grid-template-columns: 1fr; }
+}
+
+/* Bio strip */
+.bio {
+  padding: 28px 0;
+  border-top: 1px solid var(--border-f);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink-2);
+  font-weight: 300;
+}
+
+.bio strong {
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .empty-state {
