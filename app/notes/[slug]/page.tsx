@@ -55,16 +55,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${baseUrl}/notes/${slug}`,
       type: 'article',
       publishedTime: note.publishedDate,
-      ...(seo?.ogImageUrl && {
-        images: [
-          {
-            url: seo.ogImageUrl,
-            width: 1200,
-            height: 630,
-            alt: seo?.ogImageAltText || note.title,
-          },
-        ],
-      }),
+      images: [
+        {
+          url: seo?.ogImageUrl || `${baseUrl}/og?title=${encodeURIComponent(note.title)}&dek=${encodeURIComponent(note.dek || '')}&entryNumber=${note.entryNumber}&entryType=${note.entryType}&date=${note.publishedDate}`,
+          width: 1200,
+          height: 630,
+          alt: seo?.ogImageAltText || note.title,
+        },
+      ],
     },
   }
 }

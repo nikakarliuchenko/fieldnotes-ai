@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-default.png',
+        url: '/og?title=FieldNotes%20AI',
         width: 1200,
         height: 630,
         alt: 'FieldNotes AI',
