@@ -2,13 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current Branch
-
-We are actively working on the `redesign/full` branch — a full redesign of fieldnotes-ai.com. The `main` branch is the live production site and must not be modified. Screenshots of the current production site (before state) are saved in `screenshots/before/`. HTML mockup files (`1_Home__4_.html`, `2_Article__1_.html`, `3_Tools.html`) are the visual source of truth for the redesign.
-
 ## Project Overview
 
-FieldNotes AI is a personal journal/blog website built with Next.js 16 (App Router), React 19, and Contentful as a headless CMS. It was originally scaffolded with v0.app. The site catalogs field notes (journal entries) and tools used in AI development. Deployed on Vercel.
+FieldNotes AI is a personal journal/blog website built with Next.js 16 (App Router), React 19, and Contentful as a headless CMS. It was originally scaffolded with v0.app. The site catalogs field notes (journal entries) and tools used in AI development. Deployed on Vercel. All work happens directly on `main`.
 
 ## Commands
 
@@ -53,7 +49,6 @@ All pages are **async server components** using ISR with 60-second revalidation.
 - `components/RichText.tsx` — Contentful rich text document renderer
 - `app/globals.css` — Design system with CSS custom properties and animations
 - `styles/globals.css` — shadcn/ui base styles (Tailwind + tw-animate-css)
-- `planning-context.md` — Full redesign implementation plan with execution order, component map, and Playwright checkpoints
 
 ### Routes
 
@@ -77,7 +72,7 @@ Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/g
 - Optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful), AVIF/WebP formats enabled
 - The `Header` component is a client component (uses `usePathname`); everything else is server-rendered
 
-## Redesign Conventions
+## Conventions
 
 - Never use `any` type — use `unknown` and narrow
 - Never use `// @ts-ignore` — fix the underlying issue
