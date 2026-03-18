@@ -48,7 +48,7 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
           FieldNotes<span>AI</span>
         </Link>
         <ul className="nav-links">
-          {navigation.map((item) => (
+          {navigation.filter((item) => item.url !== '/tools').map((item) => (
             <li key={item.url}>
               <NavLink href={item.url} openInNewTab={item.openInNewTab} isExternal={item.isExternal}>
                 {item.label}

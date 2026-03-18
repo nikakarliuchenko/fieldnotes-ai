@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
 import { getGlobalSettings, getFeaturedFieldNote, getAllFieldNotes, getActiveTools } from '@/lib/contentful'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -75,7 +74,7 @@ export default async function HomePage() {
         </div>
         <p className="sh-sub">What happens when content infrastructure meets AI</p>
         <address className="sh-byline">
-          By <a rel="author" href="/">Nika Karliuchenko</a>
+          By <a href="https://www.linkedin.com/in/nikakarl" target="_blank" rel="author noopener noreferrer">Nika Karliuchenko</a>
         </address>
       </header>
 
@@ -110,7 +109,6 @@ export default async function HomePage() {
           <section className="tools-section" aria-label="Tools">
             <div className="sec-hd">
               <span>My Tools</span>
-              <Link href="/tools">View all →</Link>
             </div>
             <div className="tools-strip">
               {tools.map((tool) => (

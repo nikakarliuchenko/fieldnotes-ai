@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { getGlobalSettings, getAllTools } from '@/lib/contentful'
 import Header from '@/components/Header'
@@ -28,6 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ToolsPage() {
+  redirect('/')
+
   const [settings, tools] = await Promise.all([
     getGlobalSettings(),
     getAllTools(),
