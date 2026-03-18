@@ -66,7 +66,7 @@ All pages are **async server components** using ISR with 60-second revalidation.
 
 ### Styling
 
-Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/globals.css` (design system with `--ink`, `--paper`, `--accent`, `--muted` tokens) and `styles/globals.css` (shadcn/ui base). Fonts loaded via CSS variables: `--font-playfair` (Playfair Display), `--font-lora` (Lora), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` configured via `components.json` (new-york style, neutral base color). Regular CSS classes — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics in root layout.
+Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/globals.css` (design system with `--ink`, `--paper`, `--accent`, `--muted` tokens) and `styles/globals.css` (shadcn/ui base). Fonts loaded via CSS variables: `--font-playfair` (Playfair Display), `--font-ibm-plex-sans` (IBM Plex Sans), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` configured via `components.json` (new-york style, neutral base color). Regular CSS classes — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics in root layout.
 
 ### Path Alias
 
@@ -74,8 +74,7 @@ Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/g
 
 ### Build Notes
 
-- `next.config.mjs` currently has `typescript.ignoreBuildErrors: true` — redesign plan calls for removing this
-- Optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful)
+- Optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful), AVIF/WebP formats enabled
 - The `Header` component is a client component (uses `usePathname`); everything else is server-rendered
 
 ## Redesign Conventions
