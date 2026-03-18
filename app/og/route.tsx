@@ -19,11 +19,6 @@ function formatDate(dateString: string): string {
   })
 }
 
-function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength).trimEnd() + '…'
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl
@@ -45,8 +40,6 @@ export async function GET(request: NextRequest) {
     ])
 
     const hasMetaRow = entryNumber || entryType || date
-    const displayTitle = truncate(title, 120)
-    const displayDek = dek ? truncate(dek, 160) : ''
 
     return new ImageResponse(
       (
@@ -132,20 +125,19 @@ export async function GET(request: NextRequest) {
               <div
                 style={{
                   fontFamily: 'Playfair Display',
-                  fontSize: displayTitle.length > 60 ? 40 : 48,
+                  fontSize: title.length > 60 ? 40 : 48,
                   fontWeight: 700,
                   color: '#1C1917',
                   lineHeight: 1.15,
                   letterSpacing: '-0.02em',
-                  maxHeight: displayTitle.length > 60 ? 96 : 112,
                   overflow: 'hidden',
                 }}
               >
-                {displayTitle}
+                {title}
               </div>
 
               {/* Dek */}
-              {displayDek && (
+              {dek && (
                 <div
                   style={{
                     fontFamily: 'Playfair Display',
@@ -153,11 +145,10 @@ export async function GET(request: NextRequest) {
                     color: '#78716C',
                     lineHeight: 1.5,
                     marginTop: 16,
-                    maxHeight: 64,
                     overflow: 'hidden',
                   }}
                 >
-                  {displayDek}
+                  {dek}
                 </div>
               )}
             </div>
