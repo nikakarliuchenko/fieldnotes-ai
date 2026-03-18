@@ -168,23 +168,49 @@ function getDefaultGlobalSettings(): ParsedGlobalSettings {
   }
 }
 
-// Fetch all field notes
-export async function getAllFieldNotes(): Promise<ParsedFieldNote[]> {
+// Fetch all field notes (with optional pagination)
+export async function getAllFieldNotes(options?: { limit?: number; skip?: number }): Promise<ParsedFieldNote[]> {
   if (!isContentfulConfigured()) {
+    const all = getDefaultFieldNotes()
+    if (options?.limit != null || options?.skip != null) {
+      const skip = options?.skip ?? 0
+      return all.slice(skip, options?.limit != null ? skip + options.limit : undefined)
+    }
+    return all
+  }
+
+  try {
+    const query: Record<string, unknown> = {
+      content_type: 'fieldNote',
+      order: ['-fields.publishedDate'],
+      include: 2,
+    }
+    if (options?.limit != null) query.limit = options.limit
+    if (options?.skip != null) query.skip = options.skip
+
+    const response = await getClient().getEntries<IFieldNoteSkeleton>(query)
+    return response.items.map(parseFieldNote)
+  } catch (error) {
+    console.error('Error fetching field notes:', error)
     return getDefaultFieldNotes()
+  }
+}
+
+// Get total count of field notes
+export async function getTotalFieldNotesCount(): Promise<number> {
+  if (!isContentfulConfigured()) {
+    return getDefaultFieldNotes().length
   }
 
   try {
     const response = await getClient().getEntries<IFieldNoteSkeleton>({
       content_type: 'fieldNote',
-      order: ['-fields.publishedDate'],
-      include: 2,
+      limit: 0,
     })
-
-    return response.items.map(parseFieldNote)
+    return response.total
   } catch (error) {
-    console.error('Error fetching field notes:', error)
-    return getDefaultFieldNotes()
+    console.error('Error fetching field notes count:', error)
+    return 0
   }
 }
 
