@@ -36,11 +36,15 @@ All pages are **async server components** using ISR with 60-second revalidation.
 ### Contentful Content Types (Space: 7nlepvg580vx, Environment: master)
 
 - **globalSettings** — site name, domain, logo (Asset), primaryNavigation, socialLinks, copyright, defaultSeoMetadata
-- **fieldNote** — journal entries with entryNumber, slug, entryType (Learning/Building/Testing/Observing), body (RichText), publishedDate, readingTimeMinutes, relatedTools, seo, featured
-- **tool** — technology catalog with name, slug, description, category (AI Model/CMS/Dev Tool/UI Builder/AI Framework/Recording/Infrastructure/Other), vendor, url, status (Active/Testing/Retired), sortOrder, notes
+- **fieldNote** — journal entries with entryNumber, slug, entryType (Learning/Building/Testing/Observing), body (RichText), publishedDate, readingTimeMinutes, relatedTools, seo, featured, sessionCost, totalTokens, modelUsed
+- **tool** — technology catalog with name, slug, description, category (AI Model/CMS/Dev Tool/UI Builder/AI Framework/Recording/Infrastructure/Other), vendor, url, status (Active/Testing/Retired), sortOrder, simpleIconSlug, notes
 - **navigationItem** — label, url, openInNewTab, isExternal
 - **socialLink** — platform (X/LinkedIn/GitHub/YouTube), url, handle
 - **seo** — ogTitle, ogDescription, ogImage, ogType (Article/Website/Profile), robots flags, sitemap boolean
+
+### Type System
+
+`lib/types.ts` defines two layers: **Skeleton types** (`I*Skeleton`) for the Contentful SDK and **Parsed types** (`Parsed*`) used by components. All Contentful responses go through parse functions in `lib/contentful.ts` that convert SDK entries to the simpler Parsed interfaces. Always use `Parsed*` types in components.
 
 ### Key Files
 
@@ -61,16 +65,24 @@ All pages are **async server components** using ISR with 60-second revalidation.
 
 ### Styling
 
-Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/globals.css` (design system with `--ink`, `--paper`, `--accent`, `--muted` tokens) and `styles/globals.css` (shadcn/ui base). Fonts loaded via CSS variables: `--font-playfair` (Playfair Display), `--font-ibm-plex-sans` (IBM Plex Sans), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` configured via `components.json` (new-york style, neutral base color). Regular CSS classes — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics in root layout.
+Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/globals.css` (design system with `--bg`, `--ink`, `--accent`, `--border` tokens) and `styles/globals.css` (shadcn/ui base). Fonts loaded via CSS variables: `--font-playfair` (Playfair Display), `--font-ibm-plex-sans` (IBM Plex Sans), `--font-ibm-plex-mono` (IBM Plex Mono). shadcn/ui components live in `components/ui/` configured via `components.json` (new-york style, neutral base color). Regular CSS classes — **no styled-jsx** (was removed to fix Vercel build issues). Vercel Analytics in root layout.
+
+**Dark mode**: Implemented manually via `.dark` class on `<html>`. A blocking `<script>` in `app/layout.tsx` reads `localStorage('theme')` or `prefers-color-scheme` on load — no theme library. `ThemeToggle` component manages toggling. All dark tokens are in the `.dark {}` block in `app/globals.css`.
+
+**CSS naming**: Two style generations coexist in `globals.css`. Older styles use `.header-*`, `.tag-*`, `.note-*` prefixes. Newer styles (from mockup redesign) use short prefixes: `.nav`, `.art-*`, `.lbl`, `.col`, `.sec-*`, `.tc-*`. When modifying styles, match the naming convention of the section you're editing.
 
 ### Path Alias
 
 `@/*` maps to the project root (configured in tsconfig.json).
 
+### Client vs Server Components
+
+Only a few components use `"use client"`: `Header` (active nav via `usePathname`), `FilterBar` (category toggle state), `CodeBlock` (copy button), `ThemeToggle`, `ToolsContent` (filter state). Everything else is server-rendered.
+
 ### Build Notes
 
 - Optimized images with `remotePatterns` for `images.ctfassets.net` (Contentful), AVIF/WebP formats enabled
-- The `Header` component is a client component (uses `usePathname`); everything else is server-rendered
+- Tool icons use Simple Icons CDN (`cdn.simpleicons.org`) via the `simpleIconSlug` field — these use raw `<img>` tags (exception to the next/image rule) since they're external SVGs
 
 ## Conventions
 
