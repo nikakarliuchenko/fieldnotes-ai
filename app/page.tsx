@@ -51,7 +51,6 @@ export default async function HomePage() {
 
   const otherNotes = allNotes
     .filter((note) => note.slug !== featuredNote?.slug)
-    .slice(0, 5)
 
   return (
     <>
