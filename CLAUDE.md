@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -31,7 +33,7 @@ When Contentful env vars are missing, the app serves hardcoded default/demo cont
 
 ### Data Flow
 
-All pages are **async server components** using ISR with 60-second revalidation. Data is fetched from Contentful REST API (via `contentful` JS SDK — no GraphQL) through `lib/contentful.ts`, which exports: `getAllFieldNotes()`, `getFeaturedFieldNote()`, `getFieldNoteBySlug()`, `getAllFieldNoteSlugs()`, `getAllTools()`, `getActiveTools()`, and `getGlobalSettings()`. Parallel fetching with `Promise.all()` is used on pages that need multiple data sources.
+All pages are **async server components** using ISR with 60-second revalidation. Data is fetched from Contentful REST API (via `contentful` JS SDK — no GraphQL) through `lib/contentful.ts`, which exports: `getAllFieldNotes(options?)`, `getTotalFieldNotesCount()`, `getFeaturedFieldNote()`, `getFieldNoteBySlug()`, `getAllFieldNoteSlugs()`, `getAllTools()`, `getActiveTools()`, and `getGlobalSettings()`. `getAllFieldNotes` accepts `{ limit, skip }` for server-side pagination (10 per page on `/notes`). Parallel fetching with `Promise.all()` is used on pages that need multiple data sources. Include depth is 2 for linked entries.
 
 ### Contentful Content Types (Space: 7nlepvg580vx, Environment: master)
 
@@ -48,18 +50,23 @@ All pages are **async server components** using ISR with 60-second revalidation.
 
 ### Key Files
 
-- `lib/contentful.ts` — Contentful client, all data-fetching functions, fallback defaults
-- `lib/types.ts` — TypeScript interfaces for Contentful and parsed types
+- `lib/contentful.ts` — Contentful client, all data-fetching functions, parse functions, fallback defaults
+- `lib/types.ts` — TypeScript interfaces for Contentful skeleton and parsed types
+- `lib/format.ts` — `formatDate()`, `formatEntryNumber()`, `estimateWordCount()`, `getTagClass()`
+- `lib/utils.ts` — `cn()` helper (clsx + tailwind-merge)
 - `components/RichText.tsx` — Contentful rich text document renderer
 - `app/globals.css` — Design system with CSS custom properties and animations
 - `styles/globals.css` — shadcn/ui base styles (Tailwind + tw-animate-css)
+- `hooks/use-mobile.ts` — Responsive breakpoint hook
+- `hooks/use-toast.ts` — Toast notification hook
 
 ### Routes
 
 - `/` — Home page (featured notes, tools preview, about section)
-- `/notes` — All notes listing
-- `/notes/[slug]` — Individual note detail (uses `generateStaticParams`)
-- `/tools` — Tools directory
+- `/notes` — All notes listing with server-side pagination (`?page=N`)
+- `/notes/[slug]` — Individual note detail (uses `generateStaticParams`, includes JSON-LD schema)
+- `/tools` — Tools directory (currently redirects to `/`)
+- `/og` — Dynamic OG image generation (Edge Runtime, `ImageResponse` at 1200×630). Query params: `title`, `dek`, `entryNumber`, `entryType`, `date`. Fonts loaded from jsdelivr CDN.
 - `app/sitemap.ts` — Dynamic XML sitemap
 - `app/robots.ts` — Robots.txt generation
 

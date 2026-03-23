@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  logging: {
+    browserToTerminal: 'warn',
+  },
   images: {
     remotePatterns: [
       {
