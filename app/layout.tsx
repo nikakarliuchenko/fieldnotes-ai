@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@nikakarl',
+    site: '@nikaukraine',
   },
   icons: {
     icon: '/favicon.ico',

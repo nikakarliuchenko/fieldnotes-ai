@@ -27,16 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: baseUrl,
       type: 'website',
-      ...(seo?.ogImageUrl && {
-        images: [
-          {
-            url: seo.ogImageUrl,
-            width: 1200,
-            height: 630,
-            alt: seo?.ogImageAltText || 'FieldNotes AI',
-          },
-        ],
-      }),
+      images: [
+        {
+          url: seo?.ogImageUrl || `${baseUrl}/og?title=${encodeURIComponent(title)}`,
+          width: 1200,
+          height: 630,
+          alt: seo?.ogImageAltText || 'FieldNotes AI',
+        },
+      ],
     },
   }
 }
@@ -52,8 +50,44 @@ export default async function HomePage() {
   const otherNotes = allNotes
     .filter((note) => note.slug !== featuredNote?.slug)
 
+  const personJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Nika Karliuchenko',
+    url: 'https://www.fieldnotes-ai.com',
+    sameAs: [
+      'https://www.linkedin.com/in/nikakarl',
+      'https://x.com/nikaukraine',
+      'https://github.com/nikakarliuchenko',
+    ],
+    jobTitle: 'Content Infrastructure Specialist',
+    description: 'Content infrastructure specialist exploring the intersection of structured content and artificial intelligence.',
+    knowsAbout: ['AI', 'Content Infrastructure', 'Contentful', 'Claude Code', 'Next.js'],
+  }
+
+  const webSiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'FieldNotes AI',
+    url: 'https://www.fieldnotes-ai.com',
+    description: 'A practitioner journal documenting real-time AI development.',
+    author: {
+      '@type': 'Person',
+      name: 'Nika Karliuchenko',
+      url: 'https://www.fieldnotes-ai.com',
+    },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+      />
       <Header navigation={settings?.primaryNavigation || []} socialLinks={settings?.socialLinks || []} />
 
       <header className="site-header">

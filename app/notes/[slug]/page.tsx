@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = seo?.ogDescription || note.dek || ''
 
   return {
-    title: seo?.ogTitle || `${note.title} | ${settings?.siteName || 'FieldNotes AI'}`,
+    title: seo?.ogTitle || note.title,
     description,
     alternates: {
       canonical: `${baseUrl}/notes/${slug}`,
