@@ -126,7 +126,7 @@ export default async function NotePage({ params }: PageProps) {
               <span className="art-num">{formatEntryNumber(note.entryNumber)}</span>
               <span className={`lbl ${getTagClass(note.entryType)}`}>{note.entryType}</span>
               {note.sessionCost && (
-                <span className="art-cost">Session cost: {note.sessionCost}</span>
+                <span className="art-cost">Session cost: ${note.sessionCost}</span>
               )}
               <time className="art-date" dateTime={note.publishedDate}>
                 {formatDate(note.publishedDate)}

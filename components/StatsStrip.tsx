@@ -11,7 +11,7 @@ export default function StatsStrip({ sessionCost, totalTokens, modelUsed }: Stat
     <div className="stats-strip">
       {sessionCost && (
         <div className="stat">
-          <span className="stat-val">{sessionCost}</span>
+          <span className="stat-val">${sessionCost}</span>
           <span className="stat-lbl">Session cost</span>
         </div>
       )}
