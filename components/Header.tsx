@@ -1,4 +1,8 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import NavLink from './NavLink'
 import ThemeToggle from './ThemeToggle'
 import type { ParsedNavigationItem, ParsedSocialLink } from '@/lib/types'
@@ -37,6 +41,13 @@ const defaultGitHub: ParsedSocialLink = {
 }
 
 export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
+
   const links = socialLinks.some((l) => l.platform === 'GitHub')
     ? socialLinks
     : [...socialLinks, defaultGitHub]
@@ -48,7 +59,7 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
           FieldNotes<span>AI</span>
         </Link>
         <ul className="nav-links">
-          {navigation.filter((item) => item.url !== '/tools').map((item) => (
+          {navigation.map((item) => (
             <li key={item.url}>
               <NavLink href={item.url} openInNewTab={item.openInNewTab} isExternal={item.isExternal}>
                 {item.label}
@@ -56,6 +67,27 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
             </li>
           ))}
         </ul>
+        <button
+          className="nav-hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            {menuOpen ? (
+              <>
+                <line x1="4" y1="4" x2="14" y2="14" />
+                <line x1="14" y1="4" x2="4" y2="14" />
+              </>
+            ) : (
+              <>
+                <line x1="3" y1="5" x2="15" y2="5" />
+                <line x1="3" y1="9" x2="15" y2="9" />
+                <line x1="3" y1="13" x2="15" y2="13" />
+              </>
+            )}
+          </svg>
+        </button>
         <div className="nav-r" style={{ marginLeft: 'auto' }}>
           {links.map((link) => {
             const icon = socialIcons[link.platform]
@@ -78,6 +110,17 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
           <ThemeToggle />
         </div>
       </div>
+      {menuOpen && (
+        <ul className="nav-mobile">
+          {navigation.map((item) => (
+            <li key={item.url}>
+              <NavLink href={item.url} openInNewTab={item.openInNewTab} isExternal={item.isExternal}>
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      )}
     </nav>
   )
 }

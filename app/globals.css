@@ -1037,6 +1037,57 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--ink-3);
 }
 
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 12px;
+}
+
+.nav-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-mobile {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-f);
+    padding: 8px clamp(16px, 4vw, 48px);
+  }
+
+  .nav-mobile a {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 10px 0;
+    display: block;
+    transition: color 0.15s;
+  }
+
+  .nav-mobile a:hover,
+  .nav-mobile a[data-active] {
+    color: var(--ink);
+  }
+}
+
 /* --- Footer --- */
 .footer {
   background: var(--bg);
