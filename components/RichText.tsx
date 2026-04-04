@@ -3,6 +3,7 @@ import { BLOCKS, INLINES, MARKS, Document, Block, Inline } from '@contentful/ric
 import Image from 'next/image'
 import { ReactNode } from 'react'
 import CodeBlock from './CodeBlock'
+import ThemedImage from './ThemedImage'
 
 interface RichTextProps {
   content: Document
@@ -86,6 +87,23 @@ const options: Options = {
               caption={entry.fields.caption}
             />
           )
+        case 'themedImage': {
+          const lightFile = entry.fields.lightImage?.fields?.file
+          const darkFile = entry.fields.darkImage?.fields?.file
+          if (!lightFile?.url || !darkFile?.url) return null
+
+          const lightUrl = lightFile.url.startsWith('//') ? `https:${lightFile.url}` : lightFile.url
+          const darkUrl = darkFile.url.startsWith('//') ? `https:${darkFile.url}` : darkFile.url
+
+          return (
+            <ThemedImage
+              lightImageUrl={lightUrl}
+              darkImageUrl={darkUrl}
+              altText={entry.fields.altText || ''}
+              caption={entry.fields.caption}
+            />
+          )
+        }
         default:
           return null
       }
