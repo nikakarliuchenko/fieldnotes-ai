@@ -120,7 +120,7 @@ export async function getGlobalSettings(): Promise<ParsedGlobalSettings | null> 
     const response = await getClient().getEntries<IGlobalSettingsSkeleton>({
       content_type: 'globalSettings',
       limit: 1,
-      include: 2,
+      include: 3,
     })
 
     if (response.items.length === 0) {
@@ -183,7 +183,7 @@ export async function getAllFieldNotes(options?: { limit?: number; skip?: number
     const query: Record<string, unknown> = {
       content_type: 'fieldNote',
       order: ['-fields.publishedDate'],
-      include: 2,
+      include: 3,
     }
     if (options?.limit != null) query.limit = options.limit
     if (options?.skip != null) query.skip = options.skip
@@ -226,7 +226,7 @@ export async function getFeaturedFieldNote(): Promise<ParsedFieldNote | null> {
       content_type: 'fieldNote',
       order: ['-fields.publishedDate'],
       limit: 1,
-      include: 2,
+      include: 3,
     })
 
     return response.items.length > 0 ? parseFieldNote(response.items[0]) : null
@@ -248,7 +248,7 @@ export async function getFieldNoteBySlug(slug: string): Promise<ParsedFieldNote 
       content_type: 'fieldNote',
       'fields.slug': slug,
       limit: 1,
-      include: 2,
+      include: 3,
     })
 
     return response.items.length > 0 ? parseFieldNote(response.items[0]) : null

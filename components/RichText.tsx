@@ -88,9 +88,14 @@ const options: Options = {
             />
           )
         case 'themedImage': {
-          const lightFile = entry.fields.lightImage?.fields?.file
-          const darkFile = entry.fields.darkImage?.fields?.file
-          if (!lightFile?.url || !darkFile?.url) return null
+          const lightAsset = entry.fields.lightImage
+          const darkAsset = entry.fields.darkImage
+          const lightFile = lightAsset && 'fields' in lightAsset ? lightAsset.fields?.file : undefined
+          const darkFile = darkAsset && 'fields' in darkAsset ? darkAsset.fields?.file : undefined
+          if (!lightFile?.url || !darkFile?.url) {
+            console.warn('[RichText] themedImage: unresolved asset links — lightImage resolved:', !!(lightFile?.url), 'darkImage resolved:', !!(darkFile?.url))
+            return null
+          }
 
           const lightUrl = lightFile.url.startsWith('//') ? `https:${lightFile.url}` : lightFile.url
           const darkUrl = darkFile.url.startsWith('//') ? `https:${darkFile.url}` : darkFile.url
