@@ -48,14 +48,21 @@ export function SearchModal({ isOpen, onClose, fieldNoteSlugs }: SearchModalProp
 
       if (!response.ok) throw new Error('Search failed')
 
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-      if (!reader) return
+      const contentType = response.headers.get('content-type') || ''
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        setAnswer((prev) => prev + decoder.decode(value))
+      if (contentType.includes('application/json')) {
+        const data = await response.json()
+        setAnswer(data.answer || 'Something went wrong.')
+      } else {
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        if (!reader) return
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          setAnswer((prev) => prev + decoder.decode(value))
+        }
       }
     } catch {
       setAnswer('Something went wrong. Please try again.')
