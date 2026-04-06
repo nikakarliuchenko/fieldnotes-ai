@@ -15,10 +15,11 @@ export default function AskButton() {
         background: 'none',
         border: 'none',
         cursor: 'pointer',
-        padding: '0 14px',
-        height: '52px',
+        padding: '0 8px',
+        height: '28px',
         display: 'flex',
         alignItems: 'center',
+        alignSelf: 'center',
       }}
     >
       Ask {'\u2726'}
