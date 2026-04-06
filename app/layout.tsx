@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { getAllFieldNotes } from '@/lib/contentful'
+import { SearchProvider } from '@/components/SearchProvider'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -52,17 +54,24 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const fieldNotes = await getAllFieldNotes()
+  const fieldNoteSlugs = Object.fromEntries(
+    fieldNotes.map((note) => [String(note.entryNumber).padStart(3, '0'), note.slug])
+  )
+
   return (
     <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
       <body className="page-wrap">
         <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('theme')==='dark'||(!localStorage.getItem('theme')&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}` }} />
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        {children}
+        <SearchProvider fieldNoteSlugs={fieldNoteSlugs}>
+          {children}
+        </SearchProvider>
         <Analytics />
       </body>
     </html>

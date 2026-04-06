@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import NavLink from './NavLink'
 import ThemeToggle from './ThemeToggle'
+import AskButton from './AskButton'
 import type { ParsedNavigationItem, ParsedSocialLink } from '@/lib/types'
 
 const socialIcons: Record<string, React.ReactNode> = {
@@ -89,6 +90,8 @@ export default function Header({ navigation, socialLinks = [] }: HeaderProps) {
           </svg>
         </button>
         <div className="nav-r" style={{ marginLeft: 'auto' }}>
+          <AskButton />
+          <div className="nav-sep" />
           {links.map((link) => {
             const icon = socialIcons[link.platform]
             if (!icon) return null
