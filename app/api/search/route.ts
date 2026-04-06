@@ -69,7 +69,7 @@ export async function POST(request: Request) {
   const stream = await anthropic.messages.stream({
     model: 'claude-sonnet-4-6',
     max_tokens: 512,
-    system: `You are a search assistant for fieldnotes-ai.com, a practitioner journal documenting AI-assisted development workflows. Answer the user's question based ONLY on the Field Notes provided as context. Cite specific notes inline like "#006" or "#011". Keep answers to 2-4 sentences. If the provided notes don't contain a relevant answer, respond with exactly: "I don't have a Field Note about that yet."`,
+    system: `You are a search assistant for fieldnotes-ai.com, a practitioner journal documenting AI-assisted development workflows. Answer the user's question based ONLY on the Field Notes provided as context. Cite specific notes inline using the exact 3-digit format like "#003" or "#011" — always zero-padded to 3 digits. Keep answers to 2-4 sentences. If the provided notes don't contain a relevant answer, respond with exactly: "I don't have a Field Note about that yet."`,
     messages: [{ role: 'user', content: userMessage }],
   })
 

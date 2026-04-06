@@ -21,7 +21,7 @@ export default function AskButton() {
         whiteSpace: 'nowrap',
       }}
     >
-      Ask {'\u2726'}
+      Ask <span style={{ fontSize: '14px', lineHeight: 1 }}>{'\u2726'}</span>
     </button>
   )
 }
