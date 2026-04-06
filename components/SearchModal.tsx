@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -82,40 +83,83 @@ export function SearchModal({ isOpen, onClose, fieldNoteSlugs }: SearchModalProp
 
   if (!isOpen) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] px-4"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        paddingTop: '20vh',
+        padding: '20vh 16px 0',
+      }}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+        style={{
+          width: '100%',
+          maxWidth: '576px',
+          background: 'var(--bg-card)',
+          borderRadius: '12px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          border: '1px solid var(--border)',
+          overflow: 'hidden',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <form onSubmit={handleSearch} className="flex items-center border-b border-zinc-200 dark:border-zinc-700">
-          <span className="pl-4 text-zinc-400 select-none">{'\u2726'}</span>
+        <form
+          onSubmit={handleSearch}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <span style={{ paddingLeft: '16px', color: 'var(--ink-3)', userSelect: 'none' }}>{'\u2726'}</span>
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder='Ask anything — e.g. "how did you handle the git token leak?"'
-            className="flex-1 px-3 py-4 text-sm bg-transparent outline-none placeholder:text-zinc-400"
+            style={{
+              flex: 1,
+              padding: '16px 12px',
+              fontSize: '14px',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              color: 'var(--ink)',
+            }}
           />
           {loading && (
-            <span className="pr-4 text-xs text-zinc-400 animate-pulse">searching...</span>
+            <span className="animate-pulse" style={{ paddingRight: '16px', fontSize: '12px', color: 'var(--ink-3)' }}>
+              searching...
+            </span>
           )}
         </form>
 
         {(answer || loading) && (
-          <div className="px-4 py-4 text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed min-h-[80px]">
+          <div
+            style={{
+              padding: '16px',
+              fontSize: '14px',
+              color: 'var(--ink-2)',
+              lineHeight: 1.6,
+              minHeight: '80px',
+            }}
+          >
             {loading && !answer ? (
-              <span className="text-zinc-400">Searching field notes...</span>
+              <span style={{ color: 'var(--ink-3)' }}>Searching field notes...</span>
             ) : (
               renderAnswer(answer)
             )}
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
