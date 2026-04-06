@@ -92,15 +92,15 @@ export function SearchModal({ isOpen, onClose, fieldNoteSlugs }: SearchModalProp
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '20vh',
-        padding: '20vh 16px 0',
+        padding: '15vh 16px 0',
+        background: 'rgba(0, 0, 0, 0.6)',
       }}
       onClick={onClose}
     >
       <div
         style={{
           width: '100%',
-          maxWidth: '576px',
+          maxWidth: '640px',
           background: 'var(--bg-card)',
           borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
@@ -134,9 +134,20 @@ export function SearchModal({ isOpen, onClose, fieldNoteSlugs }: SearchModalProp
               color: 'var(--ink)',
             }}
           />
-          {loading && (
+          {loading ? (
             <span className="animate-pulse" style={{ paddingRight: '16px', fontSize: '12px', color: 'var(--ink-3)' }}>
               searching...
+            </span>
+          ) : !query && (
+            <span style={{
+              paddingRight: '16px',
+              fontSize: '11px',
+              fontFamily: 'var(--mono)',
+              color: 'var(--ink-3)',
+              userSelect: 'none',
+              whiteSpace: 'nowrap',
+            }}>
+              {'\u2318'}K
             </span>
           )}
         </form>
