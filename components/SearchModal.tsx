@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import ReactMarkdown from 'react-markdown'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -63,21 +64,10 @@ export function SearchModal({ isOpen, onClose, fieldNoteSlugs }: SearchModalProp
     }
   }
 
-  function renderAnswer(text: string) {
-    const parts = text.split(/(#\d{3})/g)
-    return parts.map((part, i) => {
-      const match = part.match(/^#(\d{3})$/)
-      if (match) {
-        const slug = fieldNoteSlugs[match[1]]
-        if (slug) {
-          return (
-            <a key={i} href={`/notes/${slug}`} className="underline underline-offset-2">
-              {part}
-            </a>
-          )
-        }
-      }
-      return <span key={i}>{part}</span>
+  function linkCitations(text: string) {
+    return text.replace(/#(\d{3})/g, (match, num) => {
+      const slug = fieldNoteSlugs[num]
+      return slug ? `[${match}](/notes/${slug})` : match
     })
   }
 
@@ -165,7 +155,15 @@ export function SearchModal({ isOpen, onClose, fieldNoteSlugs }: SearchModalProp
             {loading && !answer ? (
               <span style={{ color: 'var(--ink-3)' }}>Searching field notes...</span>
             ) : (
-              renderAnswer(answer)
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}>{children}</p>,
+                  strong: ({ children }) => <strong style={{ color: 'var(--ink)', fontWeight: 600 }}>{children}</strong>,
+                  a: ({ href, children }) => <a href={href} style={{ textDecoration: 'underline', textUnderlineOffset: '2px' }}>{children}</a>,
+                }}
+              >
+                {linkCitations(answer)}
+              </ReactMarkdown>
             )}
           </div>
         )}
