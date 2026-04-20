@@ -1,31 +1,9 @@
 import { z } from 'zod'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { supabase } from '../lib/supabase.js'
+import { embedQuery } from '../lib/embed.js'
 
 const SEARCH_MATCH_THRESHOLD = parseFloat(process.env.SEARCH_MATCH_THRESHOLD ?? '0.78')
-
-async function embedQuery(query: string): Promise<number[]> {
-  const response = await fetch('https://api.voyageai.com/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.VOYAGE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: [query],
-      model: 'voyage-3.5-lite',
-      input_type: 'query',
-    }),
-  })
-
-  if (!response.ok) {
-    const body = await response.text()
-    throw new Error(`Voyage AI embedding failed (${response.status}): ${body}`)
-  }
-
-  const data = await response.json() as { data: Array<{ embedding: number[] }> }
-  return data.data[0].embedding
-}
 
 export function registerSearchTool(server: McpServer): void {
   server.tool(
