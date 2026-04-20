@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { registerSearchTool } from './tools/search.js'
 import { registerCoverageTool } from './tools/coverage.js'
+import { registerPushDraftTool } from './tools/push-draft.js'
 
 // Validate required env vars at startup
 if (!process.env.MCP_AUTH_TOKEN) throw new Error('MCP_AUTH_TOKEN is required')
@@ -57,6 +58,7 @@ const mcpServer = new McpServer({
 // Register tools
 registerSearchTool(mcpServer)
 registerCoverageTool(mcpServer)
+registerPushDraftTool(mcpServer)
 
 // MCP endpoint — transport is per-request, server is persistent
 app.all('/mcp', async (req, res) => {
