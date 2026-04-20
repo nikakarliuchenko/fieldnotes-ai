@@ -344,11 +344,11 @@ Always run npm run build and verify in browser before closing a session.
 
 ### Phase status
 
-Phase 0 — Pre-work: IN PROGRESS
+Phase 0 — Pre-work: COMPLETE
 [x] Add agentSessionId field to fieldNote via Contentful MCP (2026-04-16, published v5)
 [x] Add researchSources field to fieldNote via Contentful MCP (2026-04-16, published v5)
 [x] Verify match_fieldnotes_chunks SQL — function definition is now version-controlled at supabase/migrations/001_match_fieldnotes_chunks.sql. Confirmed: ORDER BY references the distance operator directly (`embedding <=> query_embedding`, not an alias), so the HNSW index is used. Return columns: id (uuid), field_note_slug, field_note_number, field_note_title, section_title, content, similarity (double precision). Dimension note: the function signature uses untyped `vector` — the 1024-dimension constraint is enforced at the `fieldnotes_chunks.embedding` column level, not in the function signature.
-[ ] Finalize tool contracts as TypeScript interfaces with Zod input schemas
+[x] Finalize tool contracts as TypeScript interfaces with Zod input schemas — tool contracts defined in mcp-server/src/tools/ during Phase 1 implementation
 
 Phase 1 — Build MCP server: NOT STARTED
 Phase 2 — Wire Managed Agents session: NOT STARTED

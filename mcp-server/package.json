@@ -1,0 +1,26 @@
+{
+  "name": "fieldnotes-mcp-server",
+  "version": "1.0.0",
+  "description": "Custom MCP server for FieldNotes Research Agent",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@contentful/rich-text-from-markdown": "^15.0.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "contentful-management": "^12.3.0",
+    "express": "^4.18.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
