@@ -305,20 +305,21 @@ A standard Personal Access Token has full account permissions including publish 
 ### Managed Agents — access and configuration
 
 Beta header: managed-agents-2026-04-01
-Model: claude-sonnet-4-6
+Model: claude-opus-4-7
 Agent toolset: agent_toolset_20260401
 Includes: bash, web_search, web_fetch, read, write, edit, glob, grep
 All enabled by default — disable individual tools via configs array if needed
 Managed Agents API: ENABLED (confirmed April 2026 — GET /v1/agents returns {"data":[]})
-Memory stores: NOT YET ENABLED — waitlisted separately, blocks Phase 3 seeding only
+Memory stores: ENABLED — graduated to public beta April 23, 2026 under managed-agents-2026-04-01 header. No separate access needed. Mount at /mnt/memory/ in agent container. Workspace-scoped — isolate workspaces per agent to avoid cross-contamination.
 Session timeout: set to 30 minutes from day one — cost protection against stuck loops
 Networking: unrestricted (agent needs web_search, web_fetch, and MCP server access)
 Deployment target for MCP server: Railway — always-on Node.js process required
 MCP server URL: https://fieldnotes-ai-production.up.railway.app
 Do NOT deploy mcp-server to Vercel — Streamable HTTP session semantics need persistent process
 
-Known gotcha: SSE streaming endpoint may require agent-api-2026-03-01 instead of
-managed-agents-2026-04-01. Test both headers on the stream endpoint during Phase 2.
+Known gotcha: SSE streaming endpoint may return 400 with managed-agents-2026-04-01. Use the official Anthropic SDK — it handles header routing automatically. If using raw HTTP, fall back to agent-api-2026-03-01 on /v1/sessions/{id}/stream only if you get a 400.
+Known gotcha: Opus 4.7 rejects temperature, top_p, and top_k — do not set these parameters. Tokenizer inflates ~30% vs 4.6 — budget max_tokens with headroom. Thinking content is hidden by default — set display: "summarized" if needed.
+Known gotcha: Railway edge proxy idle timeout (~5-10 min). MCP server must emit SSE keepalive every 20-30 seconds during long tool calls to keep connection alive through the 30-minute session timeout.
 
 ### Trigger mechanism (to be built in Phase 2)
 
@@ -360,4 +361,4 @@ Phase 1 — Build MCP server: COMPLETE
 [x] Deploy to Railway — https://fieldnotes-ai-production.up.railway.app
 
 Phase 2 — Wire Managed Agents session: NOT STARTED
-Phase 3 — Memory + quality gate: BLOCKED (memory store access not yet approved)
+Phase 3 — Memory + quality gate: READY (memory stores public beta as of April 23, 2026)
