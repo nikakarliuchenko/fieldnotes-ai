@@ -17,9 +17,11 @@ const PORT = process.env.PORT ?? 3000
 function isAllowedOrigin(origin: string): boolean {
   const allowed = [
     'https://api.anthropic.com',
+    'https://managed-agents.anthropic.com',
     process.env.ALLOWED_ORIGIN,
   ].filter(Boolean)
   return allowed.some(o => origin.startsWith(o as string))
+    || origin.endsWith('.anthropic.com')
 }
 
 // Origin header validation (DNS rebinding protection)
