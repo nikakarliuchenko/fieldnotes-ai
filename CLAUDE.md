@@ -305,7 +305,7 @@ A standard Personal Access Token has full account permissions including publish 
 ### Managed Agents — access and configuration
 
 Beta header: managed-agents-2026-04-01
-Model: claude-opus-4-7
+Model: claude-sonnet-4-6
 Agent toolset: agent_toolset_20260401
 Includes: bash, web_search, web_fetch, read, write, edit, glob, grep
 All enabled by default — disable individual tools via configs array if needed
