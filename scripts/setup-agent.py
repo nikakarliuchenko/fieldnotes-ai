@@ -19,7 +19,10 @@ agent = client.beta.agents.create(
     name="FieldNotes Research Agent",
     model="claude-opus-4-7",
     system=system_prompt,
-    tools=[{"type": "agent_toolset_20260401"}],
+    tools=[
+        {"type": "agent_toolset_20260401"},
+        {"type": "mcp_toolset", "mcp_server_name": "fieldnotes"},
+    ],
     mcp_servers=[{
         "type": "url",
         "url": MCP_URL,
