@@ -84,6 +84,11 @@ Then follow your research methodology. Good luck."""
                 print(f"\n[Tool: {event.name}]", flush=True)
             elif etype == "agent.mcp_tool_use":
                 print(f"\n[MCP Tool: {event.mcp_server_name}/{event.name}]", flush=True)
+            elif etype == "session.error":
+                error = event.error
+                mcp = getattr(error, "mcp_server_name", None)
+                mcp_str = f" (MCP server: {mcp})" if mcp else ""
+                print(f"\n[SESSION ERROR: {error.type}{mcp_str}] {error.message}", flush=True)
             elif etype == "session.status_idle":
                 print("\n\n[Session idle — agent finished.]")
                 break
