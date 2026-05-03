@@ -21,7 +21,13 @@ agent = client.beta.agents.create(
     system=system_prompt,
     tools=[
         {"type": "agent_toolset_20260401"},
-        {"type": "mcp_toolset", "mcp_server_name": "fieldnotes"},
+        {
+            "type": "mcp_toolset",
+            "mcp_server_name": "fieldnotes",
+            "default_config": {
+                "permission_policy": {"type": "always_allow"},
+            },
+        },
     ],
     mcp_servers=[{
         "type": "url",

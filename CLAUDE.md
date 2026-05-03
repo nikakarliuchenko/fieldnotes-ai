@@ -309,6 +309,7 @@ Model: claude-sonnet-4-6
 Agent toolset: agent_toolset_20260401
 Includes: bash, web_search, web_fetch, read, write, edit, glob, grep
 All enabled by default — disable individual tools via configs array if needed
+MCP toolset permission policy: always_allow — push_contentful_draft runs without per-call approval; quality gate is the safety check
 Managed Agents API: ENABLED (confirmed April 2026 — GET /v1/agents returns {"data":[]})
 Memory stores: ENABLED — graduated to public beta April 23, 2026 under managed-agents-2026-04-01 header. No separate access needed. Mount at /mnt/memory/ in agent container. Workspace-scoped — isolate workspaces per agent to avoid cross-contamination.
 Session timeout: set to 30 minutes from day one — cost protection against stuck loops
