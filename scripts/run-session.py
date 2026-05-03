@@ -45,7 +45,7 @@ def main():
         agent=agent_id,
         environment_id=environment_id,
         vault_ids=[vault_id],
-        title=f"Research: {topic}",
+        title=f"Research: {topic}"[:500],
         betas=BETAS,
     )
     print(f"Session ID: {session.id}")
