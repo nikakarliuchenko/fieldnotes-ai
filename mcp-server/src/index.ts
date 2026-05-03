@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto'
 import express from 'express'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 import { registerSearchTool } from './tools/search.js'
 import { registerCoverageTool } from './tools/coverage.js'
 import { registerPushDraftTool } from './tools/push-draft.js'
@@ -52,7 +54,7 @@ app.get('/health', (_req, res) => {
 })
 
 // Factory: build a fresh MCP server with all tools registered.
-// Per-request instantiation is required — McpServer cannot be shared across
+// Per-session instantiation is required — McpServer cannot be shared across
 // concurrent transports (GHSA-345p-7cg4-v4c7).
 function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -65,21 +67,72 @@ function createMcpServer(): McpServer {
   return server
 }
 
-// MCP endpoint — stateless: fresh server + transport per POST.
+// Active sessions: each MCP session owns its own server + transport.
+type Session = { server: McpServer; transport: StreamableHTTPServerTransport }
+const sessions = new Map<string, Session>()
+
+function getSessionId(req: express.Request): string | undefined {
+  const header = req.headers['mcp-session-id']
+  return Array.isArray(header) ? header[0] : header
+}
+
+function badRequest(res: express.Response, message: string): void {
+  res.status(400).json({
+    jsonrpc: '2.0',
+    error: { code: -32000, message },
+    id: null,
+  })
+}
+
+// POST /mcp — initialize a new session OR send a message on an existing one.
 app.post('/mcp', async (req, res) => {
+  const sessionId = getSessionId(req)
+
+  if (sessionId) {
+    const existing = sessions.get(sessionId)
+    if (!existing) {
+      badRequest(res, `Unknown session ID: ${sessionId}`)
+      return
+    }
+    try {
+      await existing.transport.handleRequest(req, res, req.body)
+    } catch (err) {
+      console.error('MCP request error:', err)
+      if (!res.headersSent) {
+        res.status(500).json({
+          jsonrpc: '2.0',
+          error: { code: -32603, message: 'Internal server error' },
+          id: null,
+        })
+      }
+    }
+    return
+  }
+
+  if (!isInitializeRequest(req.body)) {
+    badRequest(res, 'No session ID provided and request is not an initialize')
+    return
+  }
+
   const server = createMcpServer()
   const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
+    sessionIdGenerator: () => randomUUID(),
+    onsessioninitialized: (newSessionId) => {
+      sessions.set(newSessionId, { server, transport })
+    },
   })
-  res.on('close', () => {
-    transport.close()
-    server.close()
-  })
+
+  transport.onclose = () => {
+    const sid = transport.sessionId
+    if (sid) sessions.delete(sid)
+    server.close().catch((err) => console.error('Error closing server:', err))
+  }
+
   try {
     await server.connect(transport)
     await transport.handleRequest(req, res, req.body)
   } catch (err) {
-    console.error('MCP request error:', err)
+    console.error('MCP initialize error:', err)
     if (!res.headersSent) {
       res.status(500).json({
         jsonrpc: '2.0',
@@ -90,13 +143,34 @@ app.post('/mcp', async (req, res) => {
   }
 })
 
-// GET/DELETE not supported in stateless mode.
-app.get('/mcp', (_req, res) => {
-  res.status(405).json({
-    jsonrpc: '2.0',
-    error: { code: -32000, message: 'Method not allowed' },
-    id: null,
-  })
+// GET /mcp — open SSE stream for server-initiated notifications.
+app.get('/mcp', async (req, res) => {
+  const sessionId = getSessionId(req)
+  if (!sessionId) {
+    badRequest(res, 'Missing mcp-session-id header')
+    return
+  }
+  const existing = sessions.get(sessionId)
+  if (!existing) {
+    badRequest(res, `Unknown session ID: ${sessionId}`)
+    return
+  }
+  await existing.transport.handleRequest(req, res)
+})
+
+// DELETE /mcp — terminate a session.
+app.delete('/mcp', async (req, res) => {
+  const sessionId = getSessionId(req)
+  if (!sessionId) {
+    badRequest(res, 'Missing mcp-session-id header')
+    return
+  }
+  const existing = sessions.get(sessionId)
+  if (!existing) {
+    badRequest(res, `Unknown session ID: ${sessionId}`)
+    return
+  }
+  await existing.transport.handleRequest(req, res)
 })
 
 app.listen(PORT, () => {
