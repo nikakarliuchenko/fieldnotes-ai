@@ -51,24 +51,52 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', server: 'fieldnotes-mcp', version: '1.0.0' })
 })
 
-// Create persistent MCP server at startup
-const mcpServer = new McpServer({
-  name: 'fieldnotes',
-  version: '1.0.0',
+// Factory: build a fresh MCP server with all tools registered.
+// Per-request instantiation is required — McpServer cannot be shared across
+// concurrent transports (GHSA-345p-7cg4-v4c7).
+function createMcpServer(): McpServer {
+  const server = new McpServer({
+    name: 'fieldnotes',
+    version: '1.0.0',
+  })
+  registerSearchTool(server)
+  registerCoverageTool(server)
+  registerPushDraftTool(server)
+  return server
+}
+
+// MCP endpoint — stateless: fresh server + transport per POST.
+app.post('/mcp', async (req, res) => {
+  const server = createMcpServer()
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+  })
+  res.on('close', () => {
+    transport.close()
+    server.close()
+  })
+  try {
+    await server.connect(transport)
+    await transport.handleRequest(req, res, req.body)
+  } catch (err) {
+    console.error('MCP request error:', err)
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: { code: -32603, message: 'Internal server error' },
+        id: null,
+      })
+    }
+  }
 })
 
-// Register tools
-registerSearchTool(mcpServer)
-registerCoverageTool(mcpServer)
-registerPushDraftTool(mcpServer)
-
-// MCP endpoint — transport is per-request, server is persistent
-app.all('/mcp', async (req, res) => {
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => crypto.randomUUID(),
+// GET/DELETE not supported in stateless mode.
+app.get('/mcp', (_req, res) => {
+  res.status(405).json({
+    jsonrpc: '2.0',
+    error: { code: -32000, message: 'Method not allowed' },
+    id: null,
   })
-  await mcpServer.connect(transport)
-  await transport.handleRequest(req, res)
 })
 
 app.listen(PORT, () => {
