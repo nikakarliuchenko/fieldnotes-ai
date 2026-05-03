@@ -17,7 +17,7 @@ system_prompt = Path("scripts/agent-system-prompt.md").read_text()
 print("Creating agent...")
 agent = client.beta.agents.create(
     name="FieldNotes Research Agent",
-    model="claude-opus-4-7",
+    model="claude-sonnet-4-6",
     system=system_prompt,
     tools=[
         {"type": "agent_toolset_20260401"},
