@@ -312,6 +312,10 @@ All enabled by default — disable individual tools via configs array if needed
 MCP toolset permission policy: always_allow — push_contentful_draft runs without per-call approval; quality gate is the safety check
 Managed Agents API: ENABLED (confirmed April 2026 — GET /v1/agents returns {"data":[]})
 Memory stores: ENABLED — graduated to public beta April 23, 2026 under managed-agents-2026-04-01 header. No separate access needed. Mount at /mnt/memory/ in agent container. Workspace-scoped — isolate workspaces per agent to avoid cross-contamination.
+Multiagent orchestration: NOW PUBLIC BETA — available under managed-agents-2026-04-01 header as of May 7, 2026. No separate access request needed.
+Dreaming: RESEARCH PREVIEW — scheduled process that reviews past sessions, extracts patterns, and curates memory stores automatically. Directly relevant to Phase 3 memory seeding.
+Outcomes: PUBLIC BETA — improves task success by ~10 points vs standard prompting. Evaluate for Phase 3 quality improvements.
+Webhooks: NOW SUPPORTED — session and vault lifecycle events. Useful for Phase 4 trigger mechanism.
 Session timeout: set to 30 minutes from day one — cost protection against stuck loops
 Networking: unrestricted (agent needs web_search, web_fetch, and MCP server access)
 Deployment target for MCP server: Railway — always-on Node.js process required
@@ -322,7 +326,7 @@ Known gotcha: SSE streaming endpoint may return 400 with managed-agents-2026-04-
 Known gotcha: Opus 4.7 rejects temperature, top_p, and top_k — do not set these parameters. Tokenizer inflates ~30% vs 4.6 — budget max_tokens with headroom. Thinking content is hidden by default — set display: "summarized" if needed.
 Known gotcha: Railway edge proxy idle timeout (~5-10 min). MCP server must emit SSE keepalive every 20-30 seconds during long tool calls to keep connection alive through the 30-minute session timeout.
 
-### Trigger mechanism (to be built in Phase 2)
+### Trigger mechanism (to be built in Phase 4)
 
 Managed Agents has no native scheduler. Sessions must be created by an external trigger.
 Options in order of preference:
@@ -361,5 +365,11 @@ Phase 1 — Build MCP server: COMPLETE
 [x] Implement push_contentful_draft tool with quality gate and Contentful Tags
 [x] Deploy to Railway — https://fieldnotes-ai-production.up.railway.app
 
-Phase 2 — Wire Managed Agents session: NOT STARTED
-Phase 3 — Memory + quality gate: READY (memory stores public beta as of April 23, 2026)
+Phase 2 — Wire Managed Agents session: COMPLETE
+[x] Create agent via API — agent_011Caeg93nrMaqxRXXBYnQbr (claude-sonnet-4-6, version 3)
+[x] Create environment — env_019Au6ineHcfxpb21yHtphby
+[x] Create vault and store MCP bearer token — vlt_011Caeg95SpX9aBxcwkP4AyP
+[x] Fix MCP transport reuse bug (GHSA-345p-7cg4-v4c7) — stateful sessions with per-connection server instances
+[x] Fix always_allow permission policy on MCP toolset — removes per-call confirmation
+[x] First successful end-to-end run — Field Note #023 pushed to Contentful as draft
+Phase 3 — Memory + quality gate: NOT STARTED
