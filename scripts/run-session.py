@@ -94,28 +94,49 @@ def main() -> None:
     env = load_env_agents()
     agent_id = env["AGENT_ID"]
     environment_id = env["ENVIRONMENT_ID"]
+    memory_store_id = env.get("MEMORY_STORE_ID")
     resend_key = os.environ["RESEND_API_KEY"]
 
     today = datetime.date.today()
     today_iso = today.isoformat()
     today_friendly = f"{today.strftime('%B')} {today.day}, {today.year}"
-    initial_message = (
-        "Run the research digest. Cover all six sources: Anthropic, OpenAI, "
-        "Google DeepMind, xAI/Grok, Perplexity, and Andrej Karpathy. "
-        f"Today's date is {today_iso}. "
-        "Only surface items published or updated in the last 72 hours."
-    )
+    if memory_store_id:
+        initial_message = (
+            f"Run the research digest. Today's date is {today_iso}. "
+            "Before researching, check /memory/digest-history/ for past digests "
+            "and skip any items you have already covered. "
+            "Cover all six sources: Anthropic, OpenAI, Google DeepMind, "
+            "xAI/Grok, Perplexity, and Andrej Karpathy. "
+            "Only surface items published or updated in the last 72 hours "
+            "that you have NOT already covered. "
+            "After composing the digest, write a brief summary of what you covered "
+            f"to /memory/digest-history/{today_iso}.md before finishing."
+        )
+    else:
+        initial_message = (
+            "Run the research digest. Cover all six sources: Anthropic, OpenAI, "
+            "Google DeepMind, xAI/Grok, Perplexity, and Andrej Karpathy. "
+            f"Today's date is {today_iso}. "
+            "Only surface items published or updated in the last 72 hours."
+        )
     title = f"AI Digest — {today_friendly}"[:500]
 
     client = anthropic.Anthropic()
 
     print(f"Creating session: {title}")
-    session = client.beta.sessions.create(
-        agent=agent_id,
-        environment_id=environment_id,
-        title=title,
-        betas=BETAS,
-    )
+    session_kwargs = {
+        "agent": agent_id,
+        "environment_id": environment_id,
+        "title": title,
+        "betas": BETAS,
+    }
+    if memory_store_id:
+        session_kwargs["resources"] = [{
+            "type": "memory_store",
+            "memory_store_id": memory_store_id,
+            "access": "read_write",
+        }]
+    session = client.beta.sessions.create(**session_kwargs)
     print(f"Session ID: {session.id}")
     print()
     print("-" * 60)
