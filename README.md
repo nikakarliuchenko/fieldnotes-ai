@@ -12,7 +12,7 @@ The site is aimed at practitioners and AI-curious developers who want honest acc
 
 ## Built with
 
-- Next.js 14 App Router
+- Next.js 16 App Router
 - Contentful CMS (headless, 6 content types)
 - Tailwind CSS
 - Vercel (deployment)
