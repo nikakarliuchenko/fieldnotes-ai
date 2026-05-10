@@ -102,7 +102,8 @@ def main() -> None:
     initial_message = (
         "Run the research digest. Cover all six sources: Anthropic, OpenAI, "
         "Google DeepMind, xAI/Grok, Perplexity, and Andrej Karpathy. "
-        f"Today's date is {today_iso}."
+        f"Today's date is {today_iso}. "
+        "Only surface items published or updated in the last 72 hours."
     )
     title = f"AI Digest — {today_friendly}"[:500]
 
