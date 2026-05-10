@@ -174,11 +174,11 @@ Goals: Ship fieldnotes-ai.com content regularly, build in public, learn agentic 
 
 ### Phase status
 
-Phase 0 — Infrastructure cleanup: IN PROGRESS
-[ ] Delete mcp-server/ directory
-[ ] Delete agent scaffolding scripts (setup-agent.py, update-agent-permissions.py, agent-system-prompt.md)
-[ ] Shut down Railway project
-[ ] Delete agents and vault from Anthropic Console
+Phase 0 — Infrastructure cleanup: COMPLETE
+[x] Delete mcp-server/ directory
+[x] Delete agent scaffolding scripts (setup-agent.py, update-agent-permissions.py, agent-system-prompt.md)
+[x] Shut down Railway project
+[x] Delete agents and vault from Anthropic Console
 
 Phase 1 — Build research digest agent: NOT STARTED
 [ ] Rewrite system prompt for research digest use case
