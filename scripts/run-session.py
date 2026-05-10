@@ -75,6 +75,7 @@ def send_via_resend(api_key: str, subject: str, html: str, text: str) -> None:
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "User-Agent": "fieldnotes-digest/1.0",
         },
         method="POST",
     )
