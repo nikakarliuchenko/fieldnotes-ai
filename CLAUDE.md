@@ -26,6 +26,11 @@ There are no tests configured in this project.
 - `CONTENTFUL_ACCESS_TOKEN` — Contentful delivery API token
 - `CONTENTFUL_ENVIRONMENT` — Contentful environment (defaults to 'master')
 - `NEXT_PUBLIC_SITE_URL` — Site URL for sitemap generation (defaults to https://www.fieldnotes-ai.com)
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL (used by Ask search feature)
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (used by embed and reindex)
+- `VOYAGE_API_KEY` — Voyage AI API key (used by Ask search and embed)
+- `REINDEX_SECRET` — Secret token for /api/reindex webhook endpoint
+- `ANTHROPIC_API_KEY` — Anthropic API key (used by Ask search and research digest agent)
 
 When Contentful env vars are missing, the app serves hardcoded default/demo content defined in `lib/contentful.ts`.
 
@@ -38,7 +43,7 @@ All pages are **async server components** using ISR with 60-second revalidation.
 ### Contentful Content Types (Space: 7nlepvg580vx, Environment: master)
 
 - **globalSettings** (display: Global Settings) — internalName, siteName, domain, logo (Asset), primaryNavigation (max 3 navigationItem refs), socialLinks (max 5 socialLink refs), copyright, defaultSeoMetadata (seo ref)
-- **fieldNote** (display: Field Note) — internalName, entryNumber (unique Integer), title (max 120), slug (unique Symbol, regex `^[a-z0-9-]+$`), dek (Symbol, max 200), entryType (Learning/Building/Testing/Observing), body (RichText), publishedDate, readingTimeMinutes, relatedTools (max 6 tool refs), seo (ref), featured (Boolean, default false), sessionCost, totalTokens, modelUsed
+- **fieldNote** (display: Field Note) — internalName, entryNumber (unique Integer), title (max 120), slug (unique Symbol, regex `^[a-z0-9-]+$`), dek (Symbol, max 200), entryType (Learning/Building/Testing/Observing), body (RichText), publishedDate, readingTimeMinutes, relatedTools (max 6 tool refs), seo (ref), featured (Boolean, default false), sessionCost, totalTokens, modelUsed (15 fields total — agentSessionId and researchSources removed 2026-05-09 after research-agent pivot)
 - **tool** (display: Tool) — internalName, name, slug (unique Symbol, regex `^[a-z0-9-]+$`), description (max 120), category (AI Model/CMS/Dev Tool/UI Builder/AI Framework/Recording/Other/Infrastructure), vendor, url, status (Active/Testing/Retired, default Active), sortOrder (Integer), notes (Text), simpleIconSlug
 - **navigationItem** (display: Navigation Item) — internalName, label, url, openInNewTab (Boolean, default false), isExternal (Boolean, default false)
 - **socialLink** (display: Social Link) — internalName, platform (X/LinkedIn/GitHub/YouTube), url, handle
@@ -54,6 +59,7 @@ All pages are **async server components** using ISR with 60-second revalidation.
 - `lib/types.ts` — TypeScript interfaces for Contentful skeleton and parsed types
 - `lib/format.ts` — `formatDate()`, `formatEntryNumber()`, `estimateWordCount()`, `getTagClass()`
 - `lib/utils.ts` — `cn()` helper (clsx + tailwind-merge)
+- `lib/embed.ts` — chunking, Voyage AI embeddings, Supabase pgvector upsert (powers Ask feature and reindex webhook)
 - `components/RichText.tsx` — Contentful rich text document renderer
 - `app/globals.css` — Design system with CSS custom properties and animations
 - `styles/globals.css` — shadcn/ui base styles (Tailwind + tw-animate-css)
@@ -67,6 +73,9 @@ All pages are **async server components** using ISR with 60-second revalidation.
 - `/notes/[slug]` — Individual note detail (uses `generateStaticParams`, includes JSON-LD schema)
 - `/tools` — Tools directory (currently redirects to `/`)
 - `/og` — Dynamic OG image generation (Edge Runtime, `ImageResponse` at 1200×630). Query params: `title`, `dek`, `entryNumber`, `entryType`, `date`. Fonts loaded from jsdelivr CDN.
+- `/api/search` — RAG semantic search endpoint (Ask feature, uses Voyage AI + Supabase pgvector + Anthropic)
+- `/api/reindex` — Webhook endpoint triggered by Contentful on publish to re-embed new entries
+- `/llms.txt` — LLMs.txt file for AI crawler guidance
 - `app/sitemap.ts` — Dynamic XML sitemap
 - `app/robots.ts` — Robots.txt generation
 
@@ -84,7 +93,7 @@ Tailwind CSS 4 + CSS custom properties for theming. Two CSS entry points: `app/g
 
 ### Client vs Server Components
 
-Only a few components use `"use client"`: `Header` (active nav via `usePathname`), `FilterBar` (category toggle state), `CodeBlock` (copy button), `ThemeToggle`, `ToolsContent` (filter state). Everything else is server-rendered.
+Only a few components use `"use client"`: `Header` (active nav via `usePathname`), `FilterBar` (category toggle state), `CodeBlock` (copy button), `ThemeToggle`, `ToolsContent` (filter state), `AskButton`, `SearchModal`, `SearchProvider`, `NavLink`. Everything else is server-rendered.
 
 ### Build Notes
 
@@ -153,7 +162,7 @@ have been shut down.
 - Tools: web_search, web_fetch, bash (all built-in — no MCP server)
 - Email delivery: run-session.py reads final agent output and sends via Resend API
 - Trigger: GitHub Actions cron — Monday, Wednesday, Friday at 8 AM ET
-- No Railway, no custom MCP server, no Supabase, no Contentful writes
+- No Railway, no custom MCP server, no Contentful writes (note: Supabase pgvector is still used by the website's Ask search feature — this refers to the agent only)
 
 ### Scripts
 
