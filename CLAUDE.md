@@ -189,10 +189,10 @@ Phase 0 — Infrastructure cleanup: COMPLETE
 [x] Shut down Railway project
 [x] Delete agents and vault from Anthropic Console
 
-Phase 1 — Build research digest agent: NOT STARTED
-[ ] Rewrite system prompt for research digest use case
-[ ] Recreate agent via setup-agent.py (no MCP server, no vault needed)
-[ ] Update run-session.py to read agent output and send email via Resend
+Phase 1 — Build research digest agent: IN PROGRESS
+[x] Rewrite system prompt for research digest use case
+[x] Recreate agent via setup-agent.py (no MCP server, no vault needed)
+[x] Update run-session.py to read agent output and send email via Resend
 [ ] Test run — verify email arrives at nika.miami@gmail.com
 
 Phase 2 — Automate: NOT STARTED
