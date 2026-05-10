@@ -195,10 +195,10 @@ Phase 1 — Build research digest agent: COMPLETE
 [x] Update run-session.py to read agent output and send email via Resend
 [x] Test run — verified email arrived at nika.miami@gmail.com (Cloudflare 1010 fix: added User-Agent header)
 
-Phase 2 — Automate: IN PROGRESS
+Phase 2 — Automate: COMPLETE
 [x] GitHub Actions cron — Monday, Wednesday, Friday 8 AM ET
-[ ] Add ANTHROPIC_API_KEY, RESEND_API_KEY, AGENT_ID, ENVIRONMENT_ID to GitHub Secrets
-[ ] Test automated trigger via workflow_dispatch
+[x] Add ANTHROPIC_API_KEY, RESEND_API_KEY, AGENT_ID, ENVIRONMENT_ID to GitHub Secrets
+[x] Test automated trigger via workflow_dispatch — digest delivered successfully
 
 ### Known gotchas carried forward
 
