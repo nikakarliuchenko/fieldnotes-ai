@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-FieldNotes AI is a personal journal/blog website built with Next.js 16 (App Router), React 19, and Contentful as a headless CMS. It was originally scaffolded with v0.app. The site catalogs field notes (journal entries) and tools used in AI development. Deployed on Vercel. Feature work happens on branches. Merge to `main` only when the phase is complete and tested. Current active branch: `feature/research-agent`.
+FieldNotes AI is a personal journal/blog website built with Next.js 16 (App Router), React 19, and Contentful as a headless CMS. It was originally scaffolded with v0.app. The site catalogs field notes (journal entries) and tools used in AI development. Deployed on Vercel. Feature work happens on branches. Merge to `main` only when the phase is complete and tested. Current active branch: `feature/research-agent`. The Research Agent has been pivoted from a Field Note writer to a personal AI research digest agent that monitors Anthropic, OpenAI, Google DeepMind, xAI, Perplexity, and Andrej Karpathy, and sends a structured email digest 3x per week.
 
 ## Commands
 
@@ -127,249 +127,74 @@ When auditing this repo for secrets, scan:
 - Tool-specific config directories (.claude/, .cursor/, etc.)
 - Any file that was committed and later deleted
 
-## FieldNotes Research Agent — Project Context
-
-This section documents the Managed Agents pipeline currently under construction.
-Read this before starting any session related to the mcp-server or agent wiring.
+## Research Digest Agent — Project Context
 
 ### What we are building
 
-An autonomous research pipeline that:
+A personal AI research digest agent that:
+1. Monitors 6 sources: Anthropic, OpenAI, Google DeepMind, xAI/Grok, Perplexity, Andrej Karpathy
+2. Researches using built-in web_search and web_fetch — no custom MCP server needed
+3. Produces a structured digest with three sections: What Shipped, What to Try, Field Note Candidates
+4. Sends to nika.miami@gmail.com via Resend from digest@fieldnotes-ai.com
+5. Runs 3x per week via GitHub Actions cron (Monday, Wednesday, Friday)
 
-1. Accepts a topic prompt
-2. Researches it using web search and existing Field Notes context
-3. Tests any code snippets in a sandbox
-4. Pushes a draft Field Note to Contentful as a draft entry (never publishes)
+### Why no MCP server
 
-The pipeline has three layers:
+The previous architecture had a custom MCP server on Railway with three tools
+(search_fieldnotes, check_topic_coverage, push_contentful_draft). That was the right
+architecture for writing Field Notes autonomously. For a research digest, the agent only
+needs web_search, web_fetch (both built-in), and one email send via Resend API called
+directly from run-session.py after the session completes. Railway and the MCP server
+have been shut down.
 
-- A custom MCP server (Node.js/TypeScript, deployed on Railway)
-- A Claude Managed Agents session (Anthropic cloud runtime)
-- A trigger mechanism (GitHub Actions cron or Next.js API route)
+### Architecture
 
-### Why a custom MCP server and not the existing Contentful MCP
+- Managed Agent: claude-sonnet-4-6, agent_toolset_20260401
+- Tools: web_search, web_fetch, bash (all built-in — no MCP server)
+- Email delivery: run-session.py reads final agent output and sends via Resend API
+- Trigger: GitHub Actions cron — Monday, Wednesday, Friday at 8 AM ET
+- No Railway, no custom MCP server, no Supabase, no Contentful writes
 
-The existing Contentful MCP used in Claude Code has full account permissions and no
-quality gate. The custom MCP server provides three things the existing one cannot:
+### Scripts
 
-- Supabase pgvector semantic search (no existing MCP handles this)
-- A scoped Contentful token restricted to entries.create and entries.update only
-- An automated quality gate that runs before any CMS write
+- scripts/run-session.py — session runner, reads agent output, sends email via Resend
+- scripts/.env.agents — gitignored, holds AGENT_ID and ENVIRONMENT_ID
 
-### Directory structure (to be created in Phase 1)
+### Email format — three sections
 
-mcp-server/ <- standalone Node.js package, deploy separately from main app
-src/
-index.ts <- Express server + Streamable HTTP transport
-tools/
-search.ts <- search_fieldnotes tool
-coverage.ts <- check_topic_coverage tool
-push-draft.ts <- push_contentful_draft tool
-lib/
-supabase.ts <- single reused Supabase client instance
-contentful.ts <- contentful-management client (separate from main app client)
-.env.example
-package.json
-README.md
+**What Shipped** — 3-5 factual items, one sentence each, source link, no opinion
+**What to Try** — 2-3 items relevant to Nika's stack, what it is + why it matters
+**Field Note Candidates** — 1-2 topic suggestions, topic + angle
 
-scripts/
-trigger-agent.ts <- manual session trigger for local testing
+### Agent standing context (in system prompt)
 
-### MCP server — three tools
-
-**search_fieldnotes**
-
-- Purpose: semantic search over existing Field Notes chunks in Supabase
-- When to use: before researching any topic, to understand what has already been covered
-- Input: { query: string, matchCount?: number (default 10) }
-- Output: array of { slug, title, sectionTitle, content, similarity }
-- Implementation: supabase.rpc('match_fieldnotes_chunks', { query_embedding, match_threshold: 0.78, match_count })
-
-**check_topic_coverage**
-
-- Purpose: checks if a proposed topic is too similar to already-published content
-- When to use: before committing to a topic, to avoid duplicating existing Field Notes
-- Input: { topic: string }
-- Output: { isDuplicate: boolean, similarNotes: array, highestSimilarity: number }
-- Implementation: same RPC as search_fieldnotes, threshold 0.85 (configurable via env var)
-- Note: no universal threshold exists — calibrate based on results. Raise to 0.88-0.90
-  if distinct topics are being falsely flagged as duplicates.
-
-**push_contentful_draft**
-
-- Purpose: pushes a completed draft to Contentful as a draft entry — never publishes
-- When to use: only after research is complete, code is tested, and quality gate passes
-- Input: { title, slug, dek, body (markdown string), researchSources, agentSessionId }
-- Output: { entryId, status: 'draft' }
-- Uses @contentful/rich-text-from-markdown to convert markdown body to Rich Text JSON
-  (do not construct Rich Text AST manually — error-prone and unnecessary)
-- Quality gate runs inside this tool before any CMS write — returns failure reasons
-  if it fails, routes back to agent rather than pushing bad content
-- All field values must be locale-wrapped: { 'en-US': value }
-- Agent token must be scoped to entries.create and entries.update only — never publish
-
-### Quality gate — runs inside push_contentful_draft before any CMS write
-
-Content that fails any check is returned to the agent with specific failure reasons.
-Gate checks:
-
-1. Semantic dedup score against existing content — reject if similarity > 0.85
-2. Metadata completeness — title, slug, dek, researchSources must all be present
-3. Word count — minimum 800 words, maximum 3000 words
-4. Heading structure — at least 3 H2 headings present
-5. Code snippet validation — all code blocks must have a language tag
-
-### Supabase schema — fieldnotes_chunks (already live)
-
-Table: fieldnotes_chunks
-RPC: match_fieldnotes_chunks(query_embedding vector(1024), match_threshold float, match_count int)
-Embedding model: voyage-3.5-lite — 1024 dimensions (not 512 — altered at runtime)
-Index: HNSW with vector_cosine_ops
-ORDER BY: must reference distance operator directly (embedding <=> query_embedding)
-not an alias — otherwise HNSW index is silently ignored
-Return columns: id, field_note_slug, field_note_number, field_note_title,
-section_title, content, similarity
-
-### Contentful content model — fieldNote complete field list
-
-The Architecture section above lists the original fields. This is the authoritative
-current list. Use field IDs exactly as shown — not display names.
-
-| Field ID           | Type          | Required | Notes                                                                 |
-| ------------------ | ------------- | -------- | --------------------------------------------------------------------- |
-| internalName       | Symbol        | yes      | unique; Contentful UI only, not rendered on site; display field       |
-| entryNumber        | Integer       | yes      | unique                                                                |
-| title              | Symbol        | yes      | max 120 chars                                                         |
-| slug               | Symbol        | yes      | unique; regex `^[a-z0-9-]+$`                                          |
-| dek                | Symbol        | no       | subtitle shown on site; max 200 chars (note: Symbol, not Text)        |
-| entryType          | Symbol        | yes      | Learning / Building / Testing / Observing                             |
-| body               | RichText      | yes      |                                                                       |
-| publishedDate      | Date          | yes      |                                                                       |
-| readingTimeMinutes | Integer       | no       |                                                                       |
-| relatedTools       | Array<Link>   | no       | links to tool content type; max 6 entries                             |
-| seo                | Link          | no       | links to seo content type                                             |
-| featured           | Boolean       | yes      | default false                                                         |
-| sessionCost        | Symbol        | no       | e.g. "$3.14"                                                          |
-| totalTokens        | Symbol        | no       | e.g. "2.9M"                                                           |
-| modelUsed          | Symbol        | no       | e.g. "claude-sonnet-4-6"                                              |
-| agentSessionId     | Symbol        | no       | added 2026-04-16; helpText: "Claude Managed Agents session ID that created this draft" |
-| researchSources    | Object (JSON) | no       | added 2026-04-16; helpText: "Sources researched by the agent: array of {url, title, summary}" |
-
-IMPORTANT: the field is named 'dek' not 'excerpt' and not 'tags'. Do not use wrong field IDs.
-There is no tags field on the content model — topic tags use Contentful's native Tags feature.
-
-Space ID: 7nlepvg580vx, Environment: master
-
-### Contentful tagging strategy
-
-Use Contentful's native Tags feature (not a content model field) for topic labels.
-Tags are assigned at the entry level via the CMA — no content model change needed.
-The agent should:
-
-1. Create public tags programmatically if they don't already exist
-2. Assign relevant topic tags when pushing a draft entry
-3. Use short lowercase slugs: e.g. 'rag', 'managed-agents', 'mcp', 'supabase'
-
-Tags are returned by the Delivery API under entry.metadata.tags.
-Update lib/contentful.ts parse functions to surface them if needed for the site UI.
-Public tags only — private tags are not returned by the Delivery API.
-
-### MCP server — transport and auth
-
-Transport: Streamable HTTP (not stdio, not deprecated HTTP+SSE)
-Single /mcp endpoint: POST for JSON-RPC messages, GET for server-initiated notifications
-Each connection gets a unique session via Mcp-Session-Id header
-Auth: Bearer token middleware validates Authorization header against MCP_AUTH_TOKEN env var
-Origin header must be validated on all connections — prevents DNS rebinding attacks
-Health check endpoint: GET /health
-
-### MCP server — npm dependencies
-
-@modelcontextprotocol/sdk@^1.29.0
-zod@^3.25
-@supabase/supabase-js
-contentful-management@^12.3.0
-@contentful/rich-text-from-markdown
-express
-
-### MCP server — security notes
-
-SUPABASE_SERVICE_ROLE_KEY bypasses all RLS — store only in Railway encrypted env vars,
-never in .env files committed to git. Evaluate whether anon key + narrow SELECT policy
-would suffice for the search tools — service role is only needed if writing to Supabase.
-
-CONTENTFUL_MANAGEMENT_TOKEN must be a scoped bot account token restricted to
-entries.create and entries.update on fieldNote in master environment only.
-A standard Personal Access Token has full account permissions including publish — do not use it.
-
-### Managed Agents — access and configuration
-
-Beta header: managed-agents-2026-04-01
-Model: claude-sonnet-4-6
-Agent toolset: agent_toolset_20260401
-Includes: bash, web_search, web_fetch, read, write, edit, glob, grep
-All enabled by default — disable individual tools via configs array if needed
-MCP toolset permission policy: always_allow — push_contentful_draft runs without per-call approval; quality gate is the safety check
-Managed Agents API: ENABLED (confirmed April 2026 — GET /v1/agents returns {"data":[]})
-Memory stores: ENABLED — graduated to public beta April 23, 2026 under managed-agents-2026-04-01 header. No separate access needed. Mount at /mnt/memory/ in agent container. Workspace-scoped — isolate workspaces per agent to avoid cross-contamination.
-Multiagent orchestration: NOW PUBLIC BETA — available under managed-agents-2026-04-01 header as of May 7, 2026. No separate access request needed.
-Dreaming: RESEARCH PREVIEW — scheduled process that reviews past sessions, extracts patterns, and curates memory stores automatically. Directly relevant to Phase 3 memory seeding.
-Outcomes: PUBLIC BETA — improves task success by ~10 points vs standard prompting. Evaluate for Phase 3 quality improvements.
-Webhooks: NOW SUPPORTED — session and vault lifecycle events. Useful for Phase 4 trigger mechanism.
-Session timeout: set to 30 minutes from day one — cost protection against stuck loops
-Networking: unrestricted (agent needs web_search, web_fetch, and MCP server access)
-Deployment target for MCP server: Railway — always-on Node.js process required
-MCP server URL: https://fieldnotes-ai-production.up.railway.app
-Do NOT deploy mcp-server to Vercel — Streamable HTTP session semantics need persistent process
-
-Known gotcha: SSE streaming endpoint may return 400 with managed-agents-2026-04-01. Use the official Anthropic SDK — it handles header routing automatically. If using raw HTTP, fall back to agent-api-2026-03-01 on /v1/sessions/{id}/stream only if you get a 400.
-Known gotcha: Opus 4.7 rejects temperature, top_p, and top_k — do not set these parameters. Tokenizer inflates ~30% vs 4.6 — budget max_tokens with headroom. Thinking content is hidden by default — set display: "summarized" if needed.
-Known gotcha: Railway edge proxy idle timeout (~5-10 min). MCP server must emit SSE keepalive every 20-30 seconds during long tool calls to keep connection alive through the 30-minute session timeout.
-
-### Trigger mechanism (to be built in Phase 4)
-
-Managed Agents has no native scheduler. Sessions must be created by an external trigger.
-Options in order of preference:
-
-1. GitHub Actions cron — free, version-controlled, no extra infrastructure
-2. Next.js API route with a simple admin UI — on-demand trigger from the browser
-3. Vercel cron — works but adds Vercel-specific coupling
-
-### Workflow — how Claude.ai and Claude Code interact on this project
-
-Claude.ai (this conversation) = planning, prompt writing, output review
-Claude Code = execution, file changes, Contentful MCP calls, commits
-
-Pattern for every phase:
-Claude.ai -> write Claude Code prompt for one specific task
-Claude Code -> execute task, commit
-Claude.ai -> review output, write next prompt
-
-Never give Claude Code a prompt larger than one focused task.
-Always commit working code before starting the next task.
-Always run npm run build and verify in browser before closing a session.
+Stack: Claude Managed Agents, MCP servers, Contentful, Next.js, Supabase pgvector, Voyage AI, Railway, Vercel, Resend
+Audience: AI practitioners building with Claude, Contentful developers, people building in public
+Goals: Ship fieldnotes-ai.com content regularly, build in public, learn agentic AI patterns
 
 ### Phase status
 
-Phase 0 — Pre-work: COMPLETE
-[x] Add agentSessionId field to fieldNote via Contentful MCP (2026-04-16, published v5)
-[x] Add researchSources field to fieldNote via Contentful MCP (2026-04-16, published v5)
-[x] Verify match_fieldnotes_chunks SQL — function definition is now version-controlled at supabase/migrations/001_match_fieldnotes_chunks.sql. Confirmed: ORDER BY references the distance operator directly (`embedding <=> query_embedding`, not an alias), so the HNSW index is used. Return columns: id (uuid), field_note_slug, field_note_number, field_note_title, section_title, content, similarity (double precision). Dimension note: the function signature uses untyped `vector` — the 1024-dimension constraint is enforced at the `fieldnotes_chunks.embedding` column level, not in the function signature.
-[x] Finalize tool contracts as TypeScript interfaces with Zod input schemas — tool contracts defined in mcp-server/src/tools/ during Phase 1 implementation
+Phase 0 — Infrastructure cleanup: IN PROGRESS
+[ ] Delete mcp-server/ directory
+[ ] Delete agent scaffolding scripts (setup-agent.py, update-agent-permissions.py, agent-system-prompt.md)
+[ ] Shut down Railway project
+[ ] Delete agents and vault from Anthropic Console
 
-Phase 1 — Build MCP server: COMPLETE
-[x] Scaffold mcp-server package with Streamable HTTP transport
-[x] Add Origin header validation and Bearer token auth
-[x] Implement search_fieldnotes tool (Voyage AI + Supabase pgvector)
-[x] Implement check_topic_coverage tool
-[x] Implement push_contentful_draft tool with quality gate and Contentful Tags
-[x] Deploy to Railway — https://fieldnotes-ai-production.up.railway.app
+Phase 1 — Build research digest agent: NOT STARTED
+[ ] Rewrite system prompt for research digest use case
+[ ] Recreate agent via setup-agent.py (no MCP server, no vault needed)
+[ ] Update run-session.py to read agent output and send email via Resend
+[ ] Test run — verify email arrives at nika.miami@gmail.com
 
-Phase 2 — Wire Managed Agents session: COMPLETE
-[x] Create agent via API — agent_011Caeg93nrMaqxRXXBYnQbr (claude-sonnet-4-6, version 3)
-[x] Create environment — env_019Au6ineHcfxpb21yHtphby
-[x] Create vault and store MCP bearer token — vlt_011Caeg95SpX9aBxcwkP4AyP
-[x] Fix MCP transport reuse bug (GHSA-345p-7cg4-v4c7) — stateful sessions with per-connection server instances
-[x] Fix always_allow permission policy on MCP toolset — removes per-call confirmation
-[x] First successful end-to-end run — Field Note #023 pushed to Contentful as draft
-Phase 3 — Memory + quality gate: NOT STARTED
+Phase 2 — Automate: NOT STARTED
+[ ] GitHub Actions cron — Monday, Wednesday, Friday 8 AM ET
+[ ] Add ANTHROPIC_API_KEY and RESEND_API_KEY to GitHub Secrets
+[ ] Test automated trigger
+
+### Known gotchas carried forward
+
+- agents.update() requires version: int parameter — retrieve first, pass current version
+- Session title has 500 char maximum — truncate topic string
+- Python 3.9 on this machine — no match statements, use if/elif
+- always_allow on agent toolset removes per-call confirmation — keep this setting
+- Beta header managed-agents-2026-04-01 required on every API call
