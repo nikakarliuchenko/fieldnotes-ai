@@ -27,10 +27,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude/
-.claude/settings.local.json
 .playwright-mcp/
-
-# MCP server
-mcp-server/node_modules/
-mcp-server/.env
-mcp-server/dist/
