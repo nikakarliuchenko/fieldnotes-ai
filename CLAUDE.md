@@ -201,6 +201,9 @@ Use Claude Code with the Contentful MCP at user scope. Push Rich Text JSON direc
 npx ccusage@latest session
 ```
 
+**After rotating any API key**
+Always update the corresponding environment variable in Vercel and trigger a redeploy. Rotating a key locally or in GitHub Secrets is not enough — Vercel runs the old key until redeployed. Affected keys: `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, `REINDEX_SECRET`, `RESEND_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+
 ### Email format — three sections
 
 **What Shipped** — 3-5 factual items, one sentence each, source link, no opinion
